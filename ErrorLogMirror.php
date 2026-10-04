@@ -133,6 +133,7 @@ class ErrorLogMirror
 			}
 
 			$errors[$key] = [
+				'fingerprint' => self::fingerprint($row),
 				'error_id' => (int) $row['error_id'],
 				'last_error_id' => (int) $row['error_id'],
 				'count' => 1,
@@ -146,6 +147,21 @@ class ErrorLogMirror
 		}
 
 		return array_values($errors);
+	}
+
+	/**
+	 * What makes this error the same one the next time it is logged: the identity repeats are
+	 * collapsed on, with the message hashed to keep it short. The Monolog add-on's email and Slack
+	 * outputs skip a record whose fingerprint they sent recently - without one they compare the
+	 * message alone, which is the same for every error here, so a second, different error would
+	 * be skipped as a repeat of the first.
+	 *
+	 * Never the error_id: an id that changes on every row makes every row new.
+	 */
+	public static function fingerprint(array $row): string
+	{
+		return $row['exception_type'] . ':' . $row['filename'] . ':' . $row['line']
+			. ':' . substr(md5((string) $row['message']), 0, 12);
 	}
 
 	protected function isOwnFailure(string $message): bool

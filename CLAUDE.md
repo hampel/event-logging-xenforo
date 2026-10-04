@@ -109,10 +109,16 @@ event and nothing to extend.
 - **Rows of the same type, file, line and message collapse into one record with a `count`.** A
   broken template logs on every page view. The message is in the key because everything
   `\XF::logError()` writes shares the other three.
+- **Each record carries a `fingerprint`** — that same identity, with the message hashed, and
+  never the `error_id`. `Hampel/Monolog` 5.0.1 and later deduplicate email and Slack on it;
+  without one they compare the message, which is the same for every error here, so a different
+  error inside the window would be skipped. 5.0.0 ignores the key.
 - **Rows whose message begins with a `SKIP_PREFIXES` entry are passed over.** They are this
   add-on's or `Hampel/Monolog`'s reports of a failure to log; sent at `error` they are handled,
   fail the same way and are logged again, one round per run. A new `\XF::logError()` in either
-  add-on about a logging failure needs its prefix there.
+  add-on about a logging failure needs its prefix there. `$config['monolog']` is in the list for
+  `Hampel/Monolog` 5.0.0 only, which this add-on still accepts; from 5.0.1 every row it writes
+  begins `Monolog:`, so that entry can go when the requirement is raised.
 - **It is gated on XenForo below 2.4**, which logs errors through Monolog itself and has no such
   table.
 

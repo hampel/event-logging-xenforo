@@ -87,7 +87,7 @@ alerts should match on `event`, never on the message, which may be reworded.
 | Admin actions | `admin.action` | info | `admin_log_id`, `actor_user_id`, `route` |
 | Spam triggers | `spam.triggered` | info | `content_type`, `content_id`, `user_id`, `result`, `ip` |
 | Failed logins | `login.failed` | info | `user_id`, `ip` |
-| Server errors | `error.logged` | error | `error_id`, `last_error_id`, `count`, `exception_type`, `error_message`, `filename`, `line`, `user_id`, `error_date` |
+| Server errors | `error.logged` | error | `fingerprint`, `error_id`, `last_error_id`, `count`, `exception_type`, `error_message`, `filename`, `line`, `user_id`, `error_date` |
 | Email | `mail.sent` | info | `recipient_count` |
 | | `mail.failed` | warning | `recipient_count` |
 | Payment callbacks | `payment.callback` | info | `provider_log_id`, `provider_id`, `log_type`, `transaction_id` |
@@ -139,6 +139,9 @@ Data* on, their IP address and the URL.
 
 - **Repeats are counted, not repeated.** The same error — same type, file, line and message — logged
   many times between runs is one record, with `count`, and the first and last `error_id`.
+- **`fingerprint` identifies the error, not the entry**: it is the same each time that error is
+  logged. Monolog Logging Service 5.0.1 and later use it so that email and Slack skip a repeat of
+  one error without also skipping a different one. Group and alert on it.
 - **Turning the group on starts from that moment.** Errors already in the log are not sent.
 - **The stack trace and request data are never sent.** `error_id` leads to both in the admin
   control panel.

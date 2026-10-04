@@ -1,5 +1,6 @@
 <?php namespace Tests\Feature;
 
+use Hampel\MonologEvents\Emitter;
 use Hampel\MonologEvents\ErrorLogMirror;
 use Hampel\Testing\Concerns\UsesDatabaseTransactions;
 use Tests\TestCase;
@@ -64,6 +65,7 @@ class ErrorLogMirrorTest extends TestCase
 		$this->assertSame('Server error logged', $records[0]['message']);
 		$this->assertSame([
 			'event' => 'error.logged',
+			'fingerprint' => 'ErrorException:src/addons/Foo/Bar.php:10:' . substr(md5('Template public:thread_view failed'), 0, 12),
 			'error_id' => $id,
 			'last_error_id' => $id,
 			'count' => 1,
@@ -133,6 +135,79 @@ class ErrorLogMirrorTest extends TestCase
 		$this->assertSame(1, $records[0]['context']['count']);
 		$this->assertSame('Search index is unreachable', $records[1]['context']['error_message']);
 		$this->assertSame(2, $records[1]['context']['count']);
+	}
+
+	/**
+	 * The Monolog add-on's email and Slack outputs skip a record whose fingerprint they sent
+	 * recently. So the same error must keep its fingerprint from one run to the next, and a
+	 * different one must not share it - every error here has the same message.
+	 */
+	public function test_the_fingerprint_is_the_same_for_a_repeat_and_different_for_another_error()
+	{
+		$this->enableGroup('errors');
+		$this->mirror()->run();
+		$this->logError('Search index is unreachable', 'ErrorException', 'src/XF/Error.php', 77);
+		$this->mirror()->run();
+		$this->logError('Search index is unreachable', 'ErrorException', 'src/XF/Error.php', 77);
+		$this->logError('Payment provider rejected the callback', 'ErrorException', 'src/XF/Error.php', 77);
+		$this->mirror()->run();
+
+		$prints = array_column(array_column($this->events->event('error.logged'), 'context'), 'fingerprint');
+		$this->assertCount(3, $prints);
+		$this->assertSame($prints[0], $prints[1], 'a repeat in a later run, with a new error_id');
+		$this->assertNotSame($prints[0], $prints[2], 'another message from the same place');
+	}
+
+	/**
+	 * The point of the fingerprint, through the real Monolog add-on with email on: a different
+	 * error in the next run is emailed, and a repeat of one already emailed is not.
+	 */
+	public function test_monolog_emails_a_different_error_and_skips_a_repeat()
+	{
+		if (!class_exists(\Hampel\Monolog\Handler\DeduplicatingHandler::class))
+		{
+			$this->markTestSkipped('The installed Monolog add-on is 5.0.0, which ignores the fingerprint.');
+		}
+
+		// the deduplication store lives in XenForo's temp directory; give this test its own
+		$internalData = sys_get_temp_dir() . '/monologevents-test-' . bin2hex(random_bytes(8));
+		mkdir($internalData);
+		$this->setConfig('internalDataPath', $internalData);
+		$this->setConfig('monolog', ['file' => false, 'slack' => false, 'email' => ['to' => 'logs@example.com', 'level' => 'error', 'dedup' => 300]]);
+		$this->fakesMail();
+		Emitter::setLogger(null);
+		$this->enableGroup('errors');
+
+		try
+		{
+			$this->mirror()->run();
+
+			$this->logError('Search index is unreachable', 'ErrorException', 'src/XF/Error.php', 77);
+			$this->mirror()->run();
+			Emitter::logger()->close();
+			$this->assertMailSentTimes(1);
+
+			$this->logError('Payment provider rejected the callback', 'ErrorException', 'src/XF/Error.php', 77);
+			$this->mirror()->run();
+			Emitter::logger()->close();
+			$this->assertMailSentTimes(2);
+
+			$this->logError('Search index is unreachable', 'ErrorException', 'src/XF/Error.php', 77);
+			$this->mirror()->run();
+			Emitter::logger()->close();
+			$this->assertMailSentTimes(2);
+		}
+		finally
+		{
+			foreach (new \RecursiveIteratorIterator(
+				new \RecursiveDirectoryIterator($internalData, \FilesystemIterator::SKIP_DOTS),
+				\RecursiveIteratorIterator::CHILD_FIRST
+			) AS $file)
+			{
+				$file->isDir() ? rmdir($file->getPathname()) : unlink($file->getPathname());
+			}
+			rmdir($internalData);
+		}
 	}
 
 	/**
