@@ -1,6 +1,6 @@
 <?php namespace Tests\Feature;
 
-use Hampel\MonologEvents\Emitter;
+use Hampel\EventLogging\Emitter;
 use Psr\Log\AbstractLogger;
 use Psr\Log\LoggerInterface;
 use Tests\TestCase;
@@ -12,7 +12,7 @@ class EmitterTest extends TestCase
 	 */
 	public function test_every_group_is_off_by_default()
 	{
-		$options = $this->app()->finder('XF:Option')->where('addon_id', 'Hampel/MonologEvents')->fetch();
+		$options = $this->app()->finder('XF:Option')->where('addon_id', 'Hampel/EventLogging')->fetch();
 
 		$this->assertCount(count(Emitter::GROUPS), $options);
 		foreach ($options AS $option)
@@ -89,7 +89,7 @@ class EmitterTest extends TestCase
 	 */
 	public function test_an_event_reaches_the_log_file_as_a_json_record_on_the_events_channel()
 	{
-		$file = sys_get_temp_dir() . '/monologevents-test-' . bin2hex(random_bytes(8)) . '.log';
+		$file = sys_get_temp_dir() . '/eventlogging-test-' . bin2hex(random_bytes(8)) . '.log';
 		$this->setConfig('monolog', ['file' => [
 			'path' => $file,
 			'format' => 'json',

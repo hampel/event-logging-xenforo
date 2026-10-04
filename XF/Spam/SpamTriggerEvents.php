@@ -1,6 +1,6 @@
-<?php namespace Hampel\MonologEvents\XF\Spam;
+<?php namespace Hampel\EventLogging\XF\Spam;
 
-use Hampel\MonologEvents\Emitter;
+use Hampel\EventLogging\Emitter;
 
 /**
  * XenForo writes the spam trigger log with a raw insert in the checkers' shared parent, which is

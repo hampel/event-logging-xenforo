@@ -1,7 +1,7 @@
 {
     "event_id": "app_api_complete",
     "execute_order": 10,
-    "callback_class": "Hampel\\MonologEvents\\Listener",
+    "callback_class": "Hampel\\EventLogging\\Listener",
     "callback_method": "appApiComplete",
     "active": true,
     "hint": "",

@@ -1,4 +1,4 @@
-<?php namespace Hampel\MonologEvents;
+<?php namespace Hampel\EventLogging;
 
 use XF\AddOn\AbstractSetup;
 

@@ -1,4 +1,4 @@
-<?php namespace Hampel\MonologEvents;
+<?php namespace Hampel\EventLogging;
 
 use Psr\Log\LogLevel;
 use XF\Mvc\Entity\Entity;

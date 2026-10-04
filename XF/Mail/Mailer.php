@@ -1,6 +1,6 @@
-<?php namespace Hampel\MonologEvents\XF\Mail;
+<?php namespace Hampel\EventLogging\XF\Mail;
 
-use Hampel\MonologEvents\Emitter;
+use Hampel\EventLogging\Emitter;
 use Psr\Log\LogLevel;
 
 class Mailer extends XFCP_Mailer

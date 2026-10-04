@@ -1,4 +1,4 @@
-<?php namespace Hampel\MonologEvents\XF\Spam;
+<?php namespace Hampel\EventLogging\XF\Spam;
 
 class UserChecker extends XFCP_UserChecker
 {

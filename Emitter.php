@@ -1,4 +1,4 @@
-<?php namespace Hampel\MonologEvents;
+<?php namespace Hampel\EventLogging;
 
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
@@ -19,7 +19,7 @@ class Emitter
 	public const CHANNEL = 'events';
 
 	/** Prefix on anything this add-on writes to the server error log - the error log mirror skips it */
-	public const ERROR_PREFIX = 'MonologEvents:';
+	public const ERROR_PREFIX = 'EventLogging:';
 
 	/**
 	 * Each group, its option, and the events it emits. The event names are the public API: once
@@ -27,35 +27,35 @@ class Emitter
 	 */
 	public const GROUPS = [
 		'moderation' => [
-			'option' => 'monologEventsModeration',
+			'option' => 'eventLoggingModeration',
 			'events' => ['moderator.action', 'user.banned', 'user.ban_updated', 'user.ban_lifted'],
 		],
 		'admin' => [
-			'option' => 'monologEventsAdmin',
+			'option' => 'eventLoggingAdmin',
 			'events' => ['admin.action'],
 		],
 		'spam' => [
-			'option' => 'monologEventsSpam',
+			'option' => 'eventLoggingSpam',
 			'events' => ['spam.triggered'],
 		],
 		'auth' => [
-			'option' => 'monologEventsAuth',
+			'option' => 'eventLoggingAuth',
 			'events' => ['login.failed'],
 		],
 		'errors' => [
-			'option' => 'monologEventsErrors',
+			'option' => 'eventLoggingErrors',
 			'events' => ['error.logged'],
 		],
 		'mail' => [
-			'option' => 'monologEventsMail',
+			'option' => 'eventLoggingMail',
 			'events' => ['mail.sent', 'mail.failed'],
 		],
 		'payments' => [
-			'option' => 'monologEventsPayments',
+			'option' => 'eventLoggingPayments',
 			'events' => ['payment.callback'],
 		],
 		'api' => [
-			'option' => 'monologEventsApi',
+			'option' => 'eventLoggingApi',
 			'events' => ['api.request'],
 		],
 	];

@@ -1,4 +1,4 @@
-<?php namespace Hampel\MonologEvents;
+<?php namespace Hampel\EventLogging;
 
 use Psr\Log\LogLevel;
 use XF\App;
@@ -49,7 +49,7 @@ class ErrorLogMirror
 	 */
 	public function run(): int
 	{
-		$cache = $this->app->simpleCache()->getSet('Hampel/MonologEvents');
+		$cache = $this->app->simpleCache()->getSet('Hampel/EventLogging');
 
 		if (!self::isSupported() || !Emitter::enabled('errors'))
 		{

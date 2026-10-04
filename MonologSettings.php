@@ -1,4 +1,4 @@
-<?php namespace Hampel\MonologEvents;
+<?php namespace Hampel\EventLogging;
 
 /**
  * What the Monolog Logging Service add-on will do with a record on the `events` channel.

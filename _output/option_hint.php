@@ -11,14 +11,14 @@
 namespace XF;
 
 /**
- * @property bool|null $monologEventsAdmin Log admin actions
- * @property bool|null $monologEventsApi Log API requests
- * @property bool|null $monologEventsAuth Log failed logins
- * @property bool|null $monologEventsErrors Log server errors
- * @property bool|null $monologEventsMail Log email sent
- * @property bool|null $monologEventsModeration Log moderation events
- * @property bool|null $monologEventsPayments Log payment callbacks
- * @property bool|null $monologEventsSpam Log spam triggers
+ * @property bool|null $eventLoggingAdmin Log admin actions
+ * @property bool|null $eventLoggingApi Log API requests
+ * @property bool|null $eventLoggingAuth Log failed logins
+ * @property bool|null $eventLoggingErrors Log server errors
+ * @property bool|null $eventLoggingMail Log email sent
+ * @property bool|null $eventLoggingModeration Log moderation events
+ * @property bool|null $eventLoggingPayments Log payment callbacks
+ * @property bool|null $eventLoggingSpam Log spam triggers
  */
 class Options
 {

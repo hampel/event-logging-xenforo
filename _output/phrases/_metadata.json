@@ -1,113 +1,113 @@
 {
-    "cron_entry.monologEventsErrorLog.txt": {
+    "cron_entry.eventLoggingErrorLog.txt": {
         "global_cache": false,
         "version_id": 1000011,
         "version_string": "1.0.0a1",
         "hash": "d8e97fae40b393e187db41308172cf11"
     },
-    "option.monologEventsAdmin.txt": {
+    "option.eventLoggingAdmin.txt": {
         "global_cache": false,
         "version_id": 1000011,
         "version_string": "1.0.0a1",
         "hash": "852b2fb91b558164b4bedc51bfea393a"
     },
-    "option.monologEventsApi.txt": {
+    "option.eventLoggingApi.txt": {
         "global_cache": false,
         "version_id": 1000011,
         "version_string": "1.0.0a1",
         "hash": "f0a3df2859bd71b39e71fe3c5401b192"
     },
-    "option.monologEventsAuth.txt": {
+    "option.eventLoggingAuth.txt": {
         "global_cache": false,
         "version_id": 1000011,
         "version_string": "1.0.0a1",
         "hash": "62eccc8548f155ccc5f8df07a3c070d6"
     },
-    "option.monologEventsErrors.txt": {
+    "option.eventLoggingErrors.txt": {
         "global_cache": false,
         "version_id": 1000011,
         "version_string": "1.0.0a1",
         "hash": "825ce10ef087d061e1f440a6c571b6a7"
     },
-    "option.monologEventsMail.txt": {
+    "option.eventLoggingMail.txt": {
         "global_cache": false,
         "version_id": 1000011,
         "version_string": "1.0.0a1",
         "hash": "29f40033a03763386e2b796df8d5e629"
     },
-    "option.monologEventsModeration.txt": {
+    "option.eventLoggingModeration.txt": {
         "global_cache": false,
         "version_id": 1000011,
         "version_string": "1.0.0a1",
         "hash": "0215bd42724ce20fedb03884e8cc94b0"
     },
-    "option.monologEventsPayments.txt": {
+    "option.eventLoggingPayments.txt": {
         "global_cache": false,
         "version_id": 1000011,
         "version_string": "1.0.0a1",
         "hash": "7e5784798243da22df79321d9da8f2bd"
     },
-    "option.monologEventsSpam.txt": {
+    "option.eventLoggingSpam.txt": {
         "global_cache": false,
         "version_id": 1000011,
         "version_string": "1.0.0a1",
         "hash": "ba52759aabb1d475a42104b09f47d9e1"
     },
-    "option_explain.monologEventsAdmin.txt": {
+    "option_explain.eventLoggingAdmin.txt": {
         "global_cache": false,
         "version_id": 1000011,
         "version_string": "1.0.0a1",
         "hash": "1bb2fad034c880237ca00046fde828a6"
     },
-    "option_explain.monologEventsApi.txt": {
+    "option_explain.eventLoggingApi.txt": {
         "global_cache": false,
         "version_id": 1000011,
         "version_string": "1.0.0a1",
         "hash": "3fe15db02c3ba57806743d82cf0d7792"
     },
-    "option_explain.monologEventsAuth.txt": {
+    "option_explain.eventLoggingAuth.txt": {
         "global_cache": false,
         "version_id": 1000011,
         "version_string": "1.0.0a1",
         "hash": "e1da88373c588ee696476d31de1e8d70"
     },
-    "option_explain.monologEventsErrors.txt": {
+    "option_explain.eventLoggingErrors.txt": {
         "global_cache": false,
         "version_id": 1000011,
         "version_string": "1.0.0a1",
         "hash": "098d97889f43a46ca83091bea321a426"
     },
-    "option_explain.monologEventsMail.txt": {
+    "option_explain.eventLoggingMail.txt": {
         "global_cache": false,
         "version_id": 1000011,
         "version_string": "1.0.0a1",
         "hash": "342c05333805d434141e523c4fa668ab"
     },
-    "option_explain.monologEventsModeration.txt": {
+    "option_explain.eventLoggingModeration.txt": {
         "global_cache": false,
         "version_id": 1000011,
         "version_string": "1.0.0a1",
         "hash": "3d1052a76273fa2c80abd3f0c6f402aa"
     },
-    "option_explain.monologEventsPayments.txt": {
+    "option_explain.eventLoggingPayments.txt": {
         "global_cache": false,
         "version_id": 1000011,
         "version_string": "1.0.0a1",
         "hash": "f9c77afe37b8838d68ca6703763b5a8d"
     },
-    "option_explain.monologEventsSpam.txt": {
+    "option_explain.eventLoggingSpam.txt": {
         "global_cache": false,
         "version_id": 1000011,
         "version_string": "1.0.0a1",
         "hash": "3e7ba9c7bdb049d0d370c611de2c01a4"
     },
-    "option_group.monologEvents.txt": {
+    "option_group.eventLogging.txt": {
         "global_cache": false,
         "version_id": 1000011,
         "version_string": "1.0.0a1",
-        "hash": "fa64a4a9ae70980152b8e5710f44facc"
+        "hash": "a56f45c58994922e3109131d37ff6a48"
     },
-    "option_group_description.monologEvents.txt": {
+    "option_group_description.eventLogging.txt": {
         "global_cache": false,
         "version_id": 1000011,
         "version_string": "1.0.0a1",

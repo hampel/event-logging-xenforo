@@ -1,4 +1,4 @@
-<?php namespace Hampel\MonologEvents\Cli;
+<?php namespace Hampel\EventLogging\Cli;
 
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 use Symfony\Component\Console\Output\OutputInterface;

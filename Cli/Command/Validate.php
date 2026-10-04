@@ -1,9 +1,9 @@
-<?php namespace Hampel\MonologEvents\Cli\Command;
+<?php namespace Hampel\EventLogging\Cli\Command;
 
-use Hampel\MonologEvents\Cli\RendersReport;
-use Hampel\MonologEvents\Emitter;
-use Hampel\MonologEvents\ErrorLogMirror;
-use Hampel\MonologEvents\MonologSettings;
+use Hampel\EventLogging\Cli\RendersReport;
+use Hampel\EventLogging\Emitter;
+use Hampel\EventLogging\ErrorLogMirror;
+use Hampel\EventLogging\MonologSettings;
 use Psr\Log\NullLogger;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -27,7 +27,7 @@ class Validate extends Command
 	protected function configure()
 	{
 		$this
-			->setName('monolog-events:validate')
+			->setName('event-logging:validate')
 			->setDescription('Check that events can reach the log')
 			->addOption('unattended', null, InputOption::VALUE_NONE,
 				'Skip the probe, which writes a record - for a gate nobody is watching');
@@ -98,7 +98,7 @@ class Validate extends Command
 
 		$on
 			? $this->checkOk('event groups', count($on) . ' of ' . count(Emitter::GROUPS) . ' on: ' . implode(', ', $on))
-			: $this->checkSkip('event groups', 'none is on - nothing is emitted until one is, under Options > Monolog events');
+			: $this->checkSkip('event groups', 'none is on - nothing is emitted until one is, under Options > Event logging');
 	}
 
 	/**
@@ -155,15 +155,15 @@ class Validate extends Command
 			return;
 		}
 
-		$cron = \XF::em()->find('XF:CronEntry', 'monologEventsErrorLog');
+		$cron = \XF::em()->find('XF:CronEntry', 'eventLoggingErrorLog');
 		if (!$cron || !$cron->active)
 		{
-			$this->checkFail('cron entry', 'monologEventsErrorLog is missing or disabled - no server error is sent');
+			$this->checkFail('cron entry', 'eventLoggingErrorLog is missing or disabled - no server error is sent');
 			return;
 		}
 		$this->checkOk('cron entry', 'active');
 
-		$cache = \XF::app()->simpleCache()->getSet('Hampel/MonologEvents');
+		$cache = \XF::app()->simpleCache()->getSet('Hampel/EventLogging');
 		if (!$cache->keyExists(ErrorLogMirror::CACHE_KEY))
 		{
 			$this->checkOk('position', 'not started - the next cron run begins from the newest error');
@@ -196,7 +196,7 @@ class Validate extends Command
 		$isFile = $path !== null && !preg_match('#^[a-z][a-z0-9+.-]*://#i', $path);
 		$offset = $isFile && is_file($path) ? (int) filesize($path) : 0;
 
-		$logger->info('Event logging probe', ['event' => 'monologevents.validate', 'probe' => true, 'run' => $run]);
+		$logger->info('Event logging probe', ['event' => 'eventlogging.validate', 'probe' => true, 'run' => $run]);
 		$this->checkOk('probe record', "written to the " . Emitter::CHANNEL . " channel at Info, run {$run}");
 
 		$level = MonologSettings::fileLevel();

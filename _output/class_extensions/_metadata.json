@@ -1,14 +1,14 @@
 {
-    "XF-Mail-Mailer_Hampel-MonologEvents-XF-Mail-Mailer.json": {
-        "hash": "7a0c1aab4b9a52d20f2dbd663d4732f5"
+    "XF-Mail-Mailer_Hampel-EventLogging-XF-Mail-Mailer.json": {
+        "hash": "0615e9fa812ca31980cd2306b54b8133"
     },
-    "XF-Repository-AdminLog_Hampel-MonologEvents-XF-Repository-AdminLog.json": {
-        "hash": "4040575d8766b47ad066289f711a413c"
+    "XF-Repository-AdminLog_Hampel-EventLogging-XF-Repository-AdminLog.json": {
+        "hash": "ca7016edd85f159f75a0118090c1c092"
     },
-    "XF-Spam-ContentChecker_Hampel-MonologEvents-XF-Spam-ContentChecker.json": {
-        "hash": "e8f27cecc42b5d86c92096141c7c2df0"
+    "XF-Spam-ContentChecker_Hampel-EventLogging-XF-Spam-ContentChecker.json": {
+        "hash": "41bfef65e1a75a08a4bfeb87c2c7d89d"
     },
-    "XF-Spam-UserChecker_Hampel-MonologEvents-XF-Spam-UserChecker.json": {
-        "hash": "aca872fe4fc5d73c20747f133b58ca3a"
+    "XF-Spam-UserChecker_Hampel-EventLogging-XF-Spam-UserChecker.json": {
+        "hash": "0e90f394ec582fa64173cc3f5df4d95f"
     }
 }

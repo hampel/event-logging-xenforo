@@ -8,17 +8,17 @@
  * @noinspection PhpMultipleClassesDeclarationsInOneFile
  */
 
-namespace Hampel\MonologEvents\XF\Mail
+namespace Hampel\EventLogging\XF\Mail
 {
 	class XFCP_Mailer extends \XF\Mail\Mailer {}
 }
 
-namespace Hampel\MonologEvents\XF\Repository
+namespace Hampel\EventLogging\XF\Repository
 {
 	class XFCP_AdminLog extends \XF\Repository\AdminLog {}
 }
 
-namespace Hampel\MonologEvents\XF\Spam
+namespace Hampel\EventLogging\XF\Spam
 {
 	class XFCP_ContentChecker extends \XF\Spam\ContentChecker {}
 	class XFCP_UserChecker extends \XF\Spam\UserChecker {}

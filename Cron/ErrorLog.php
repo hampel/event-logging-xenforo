@@ -1,6 +1,6 @@
-<?php namespace Hampel\MonologEvents\Cron;
+<?php namespace Hampel\EventLogging\Cron;
 
-use Hampel\MonologEvents\ErrorLogMirror;
+use Hampel\EventLogging\ErrorLogMirror;
 
 class ErrorLog
 {

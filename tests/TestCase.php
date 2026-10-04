@@ -1,6 +1,6 @@
 <?php namespace Tests;
 
-use Hampel\MonologEvents\Emitter;
+use Hampel\EventLogging\Emitter;
 use Hampel\Testing\TestCase as BaseTestCase;
 
 abstract class TestCase extends BaseTestCase
@@ -16,7 +16,7 @@ abstract class TestCase extends BaseTestCase
 	 * @var array $addonsToLoad this add-on and the one it requires, so that no other add-on's
 	 * listeners or class extensions can affect the run
 	 */
-	protected $addonsToLoad = ['Hampel/Monolog', 'Hampel/MonologEvents'];
+	protected $addonsToLoad = ['Hampel/Monolog', 'Hampel/EventLogging'];
 
 	/** @var RecordingLogger what the add-on emitted during this test */
 	protected $events;

@@ -1,6 +1,6 @@
 <?php namespace Tests\Feature;
 
-use Hampel\MonologEvents\XF\Repository\AdminLog;
+use Hampel\EventLogging\XF\Repository\AdminLog;
 use Hampel\Testing\Concerns\UsesDatabaseTransactions;
 use Symfony\Component\Mailer\SentMessage;
 use Symfony\Component\Mailer\Transport\AbstractTransport;

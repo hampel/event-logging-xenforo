@@ -1,5 +1,5 @@
 {
-    "cron_class": "Hampel\\MonologEvents\\Cron\\ErrorLog",
+    "cron_class": "Hampel\\EventLogging\\Cron\\ErrorLog",
     "cron_method": "mirror",
     "run_rules": {
         "minutes": [

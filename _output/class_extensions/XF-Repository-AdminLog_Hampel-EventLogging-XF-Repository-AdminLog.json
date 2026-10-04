@@ -1,6 +1,6 @@
 {
     "from_class": "XF\\Repository\\AdminLog",
-    "to_class": "Hampel\\MonologEvents\\XF\\Repository\\AdminLog",
+    "to_class": "Hampel\\EventLogging\\XF\\Repository\\AdminLog",
     "execute_order": 10,
     "active": true
 }

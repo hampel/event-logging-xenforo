@@ -8,4 +8,4 @@
   actions, spam triggers, failed logins, server errors, email, payment callbacks and API requests
 - new: the server error log is sent every five minutes, with repeats of one error counted into a
   single record
-- new: `monolog-events:config` and `monolog-events:validate` CLI commands
+- new: `event-logging:config` and `event-logging:validate` CLI commands

@@ -1,7 +1,7 @@
 {
     "event_id": "entity_post_delete",
     "execute_order": 10,
-    "callback_class": "Hampel\\MonologEvents\\Listener",
+    "callback_class": "Hampel\\EventLogging\\Listener",
     "callback_method": "userBanPostDelete",
     "active": true,
     "hint": "XF\\Entity\\UserBan",

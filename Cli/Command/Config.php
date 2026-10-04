@@ -1,16 +1,16 @@
-<?php namespace Hampel\MonologEvents\Cli\Command;
+<?php namespace Hampel\EventLogging\Cli\Command;
 
-use Hampel\MonologEvents\Cli\RendersReport;
-use Hampel\MonologEvents\Emitter;
-use Hampel\MonologEvents\ErrorLogMirror;
-use Hampel\MonologEvents\MonologSettings;
+use Hampel\EventLogging\Cli\RendersReport;
+use Hampel\EventLogging\Emitter;
+use Hampel\EventLogging\ErrorLogMirror;
+use Hampel\EventLogging\MonologSettings;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * Which events this forum sends to its logs, and whether the log file will take them. It reads
- * and prints; it writes nothing. monolog-events:validate is the command that finds out whether
+ * and prints; it writes nothing. event-logging:validate is the command that finds out whether
  * any of it works.
  */
 class Config extends Command
@@ -20,7 +20,7 @@ class Config extends Command
 	protected function configure()
 	{
 		$this
-			->setName('monolog-events:config')
+			->setName('event-logging:config')
 			->setDescription('Show which events this forum sends to its logs');
 	}
 
@@ -53,7 +53,7 @@ class Config extends Command
 		}
 		else
 		{
-			$cache = \XF::app()->simpleCache()->getSet('Hampel/MonologEvents');
+			$cache = \XF::app()->simpleCache()->getSet('Hampel/EventLogging');
 			$this->detail('mirror', Emitter::enabled('errors') ? 'on' : $this->muted('off'));
 			$this->detail('last error sent', $cache->keyExists(ErrorLogMirror::CACHE_KEY)
 				? '#' . (int) $cache->getValue(ErrorLogMirror::CACHE_KEY) : '');

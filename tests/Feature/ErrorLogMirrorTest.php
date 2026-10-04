@@ -1,7 +1,7 @@
 <?php namespace Tests\Feature;
 
-use Hampel\MonologEvents\Emitter;
-use Hampel\MonologEvents\ErrorLogMirror;
+use Hampel\EventLogging\Emitter;
+use Hampel\EventLogging\ErrorLogMirror;
 use Hampel\Testing\Concerns\UsesDatabaseTransactions;
 use Tests\TestCase;
 
@@ -34,7 +34,7 @@ class ErrorLogMirrorTest extends TestCase
 
 	private function position()
 	{
-		return $this->app()->simpleCache()->getValue('Hampel/MonologEvents', ErrorLogMirror::CACHE_KEY);
+		return $this->app()->simpleCache()->getValue('Hampel/EventLogging', ErrorLogMirror::CACHE_KEY);
 	}
 
 	/**
@@ -170,7 +170,7 @@ class ErrorLogMirrorTest extends TestCase
 		}
 
 		// the deduplication store lives in XenForo's temp directory; give this test its own
-		$internalData = sys_get_temp_dir() . '/monologevents-test-' . bin2hex(random_bytes(8));
+		$internalData = sys_get_temp_dir() . '/eventlogging-test-' . bin2hex(random_bytes(8));
 		mkdir($internalData);
 		$this->setConfig('internalDataPath', $internalData);
 		$this->setConfig('monolog', ['file' => false, 'slack' => false, 'email' => ['to' => 'logs@example.com', 'level' => 'error', 'dedup' => 300]]);
@@ -219,7 +219,7 @@ class ErrorLogMirrorTest extends TestCase
 		$this->enableGroup('errors');
 		$this->mirror()->run();
 		$this->logError('Monolog: posting to Slack failed - timed out');
-		$this->logError('MonologEvents: an event could not be logged - disk full');
+		$this->logError('EventLogging: an event could not be logged - disk full');
 		$last = $this->logError("\$config['monolog']['handlers'] holds an entry that is not callable; it was skipped.");
 
 		$this->assertSame(0, $this->mirror()->run());
@@ -245,7 +245,7 @@ class ErrorLogMirrorTest extends TestCase
 		$this->mirror()->run();
 		$this->assertNotNull($this->position());
 
-		$this->setOption('monologEventsErrors', false);
+		$this->setOption('eventLoggingErrors', false);
 		$this->logError('While it was off');
 		$this->mirror()->run();
 
@@ -257,7 +257,7 @@ class ErrorLogMirrorTest extends TestCase
 	{
 		$this->enableGroup('errors');
 		$id = $this->logError('After the log was cleared');
-		$this->app()->simpleCache()->setValue('Hampel/MonologEvents', ErrorLogMirror::CACHE_KEY, $id + 1000);
+		$this->app()->simpleCache()->setValue('Hampel/EventLogging', ErrorLogMirror::CACHE_KEY, $id + 1000);
 
 		$this->mirror()->run();
 
@@ -267,7 +267,7 @@ class ErrorLogMirrorTest extends TestCase
 
 	public function test_the_cron_entry_runs_the_mirror()
 	{
-		$entry = $this->app()->em()->find('XF:CronEntry', 'monologEventsErrorLog');
+		$entry = $this->app()->em()->find('XF:CronEntry', 'eventLoggingErrorLog');
 
 		$this->assertNotNull($entry);
 		$this->assertTrue($entry->active);

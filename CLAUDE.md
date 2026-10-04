@@ -4,8 +4,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Scope
 
-This is one XenForo add-on — `Hampel/MonologEvents`, "Event Logging for Monolog". It sits at
-`src/addons/Hampel/MonologEvents/` inside a XenForo install and is its own git repository; the
+This is one XenForo add-on — `Hampel/EventLogging`, "Event Logging for Monolog". It sits at
+`src/addons/Hampel/EventLogging/` inside a XenForo install and is its own git repository; the
 install around it is not, and any sibling add-ons beside it are other repositories.
 
 Where the install has an `AGENTS.md` at its root, read it first — it carries the XF conventions,
@@ -33,7 +33,7 @@ does.
 
 **One method, and it never throws.** It is called from inside a moderator's action, a login and a
 payment callback; none may fail because a log file could not be written. A failure is reported to
-the server error log once per request, prefixed `MonologEvents:`.
+the server error log once per request, prefixed `EventLogging:`.
 
 **`Emitter::GROUPS` is the list of groups, their options and their events.** A group whose option
 is off emits nothing, and every option defaults to off: installing the add-on must never be the
@@ -132,9 +132,9 @@ is already logging one such row for every other error.
 Run from the XenForo install root:
 
 ```bash
-php cmd.php xf-dev:import --addon=Hampel/MonologEvents     # after hand-editing anything in _output/
-php cmd.php monolog-events:config
-php cmd.php monolog-events:validate
+php cmd.php xf-dev:import --addon=Hampel/EventLogging     # after hand-editing anything in _output/
+php cmd.php event-logging:config
+php cmd.php event-logging:validate
 ```
 
 Tests run from the add-on root, against the XenForo install around it:

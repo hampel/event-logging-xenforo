@@ -20,16 +20,16 @@ needs a person.
 
 **Other artifacts**
 
-- Options: eight, in the `monologEvents` group, all boolean and all off by default.
-- Cron entry: `monologEventsErrorLog`, every five minutes.
-- CLI commands: `monolog-events:config` and `monolog-events:validate`.
+- Options: eight, in the `eventLogging` group, all boolean and all off by default.
+- Cron entry: `eventLoggingErrorLog`, every five minutes.
+- CLI commands: `event-logging:config` and `event-logging:validate`.
 - Simple cache: one value, the last server error sent.
 - No tables, columns, templates, template modifications, routes or permissions.
 
 ## Fragile points
 
 - **Event records are Info and Monolog's log file defaults to Warning.** With a group on and
-  `config.php` unchanged, every listener runs and nothing is written. `monolog-events:validate`
+  `config.php` unchanged, every listener runs and nothing is written. `event-logging:validate`
   warns.
 - **A listener on an entity nothing saves never fires.** XenForo writes the admin log, the spam
   trigger log and the error log with raw inserts. Each source is tested through XenForo's own
@@ -39,7 +39,7 @@ needs a person.
 - **The admin log extension is registered under its XenForo 2.2 class name.** 2.3 resolves it
   through a class alias; a later XenForo that drops the alias drops the event, silently.
 - **The error log mirror depends on cron running.** If it stops, errors stop arriving and nothing
-  says so; `monolog-events:validate` warns once more rows are waiting than one run sends.
+  says so; `event-logging:validate` warns once more rows are waiting than one run sends.
 
 ## Automated
 

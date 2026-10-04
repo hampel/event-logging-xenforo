@@ -1,7 +1,7 @@
 <?php namespace Tests\Feature;
 
-use Hampel\MonologEvents\Cli\Command\Config;
-use Hampel\MonologEvents\Cli\Command\Validate;
+use Hampel\EventLogging\Cli\Command\Config;
+use Hampel\EventLogging\Cli\Command\Validate;
 use Symfony\Component\Console\Tester\CommandTester;
 use Tests\TestCase;
 

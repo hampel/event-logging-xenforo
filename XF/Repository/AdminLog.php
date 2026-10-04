@@ -1,6 +1,6 @@
-<?php namespace Hampel\MonologEvents\XF\Repository;
+<?php namespace Hampel\EventLogging\XF\Repository;
 
-use Hampel\MonologEvents\Emitter;
+use Hampel\EventLogging\Emitter;
 
 /**
  * XenForo writes the admin log with a raw insert, so no entity event fires for it and a class

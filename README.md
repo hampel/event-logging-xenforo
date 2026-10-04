@@ -67,10 +67,10 @@ $config['monolog'] = [
 - **`format`** is optional. A log collector can only read an event's fields from JSON; the line
   format keeps them as text.
 
-Last, turn on the groups you want under *Options > Monolog events*, and check the result:
+Last, turn on the groups you want under *Options > Event logging*, and check the result:
 
 ```bash
-php cmd.php monolog-events:validate
+php cmd.php event-logging:validate
 ```
 
 ## Events
@@ -157,13 +157,13 @@ arrive this way.
 Two commands, run from the XenForo root:
 
 ```bash
-php cmd.php monolog-events:config                  # which groups are on, and the log file's level
-php cmd.php monolog-events:validate                # whether an event can reach the log
-php cmd.php monolog-events:validate --unattended   # the same, without writing a probe record
+php cmd.php event-logging:config                  # which groups are on, and the log file's level
+php cmd.php event-logging:validate                # whether an event can reach the log
+php cmd.php event-logging:validate --unattended   # the same, without writing a probe record
 ```
 
-**`monolog-events:validate` writes one record**, marked `"probe": true` with the event
-`monologevents.validate`, and looks for it in the log file. It warns if the log file does not take
+**`event-logging:validate` writes one record**, marked `"probe": true` with the event
+`eventlogging.validate`, and looks for it in the log file. It warns if the log file does not take
 Info from the `events` channel, or is not in the JSON format. It exits 1 if a check failed and 0
 otherwise, warnings included.
 

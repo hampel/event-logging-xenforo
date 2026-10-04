@@ -8,6 +8,6 @@
     "advanced": false,
     "default_value": "0",
     "relations": {
-        "monologEvents": 10
+        "eventLogging": 30
     }
 }
