@@ -25,7 +25,7 @@ class EntityEventsTest extends TestCase
 			'discussion_content_type' => 'thread',
 			'discussion_content_id' => 55,
 			'action' => 'delete_soft',
-			'action_params' => ['reason' => 'breach of rule four'],
+			'action_params' => ['reason' => 'breach of rule four', 'old_title' => 'An earlier name'],
 		]);
 	}
 
@@ -46,26 +46,34 @@ class EntityEventsTest extends TestCase
 			'content_type' => 'post',
 			'content_id' => 90211,
 			'content_user_id' => 12,
+			'content_username' => 'Alice Example',
 			'content_title' => 'A private matter',
 			'discussion_content_type' => 'thread',
 			'discussion_content_id' => 55,
 			'action' => 'delete_soft',
+			'reason' => 'breach of rule four',
 		], $records[0]['context']);
 	}
 
 	/**
-	 * The title is there to read the line by. The action's parameters and the member's name are
-	 * not: one is free text XenForo keeps for itself, the other is what content_user_id is for.
+	 * The reason is the one action parameter taken; the rest are per-action detail.
 	 */
-	public function test_a_moderator_action_carries_the_title_and_not_its_parameters()
+	public function test_a_moderator_action_carries_its_reason_and_no_other_parameter()
 	{
 		$this->enableGroup('moderation');
 
 		$this->moderatorLog();
 
-		$this->assertStringContainsString('A private matter', $this->emitted());
-		$this->assertStringNotContainsString('Alice', $this->emitted());
-		$this->assertStringNotContainsString('rule four', $this->emitted());
+		$this->assertStringContainsString('rule four', $this->emitted());
+		$this->assertStringNotContainsString('earlier name', $this->emitted());
+	}
+
+	public function test_a_moderator_action_with_no_reason_has_a_null_reason()
+	{
+		$this->assertNull(\Hampel\EventLogging\Listener::reason([]));
+		$this->assertNull(\Hampel\EventLogging\Listener::reason(['reason' => '']));
+		$this->assertNull(\Hampel\EventLogging\Listener::reason(''));
+		$this->assertSame('spam', \Hampel\EventLogging\Listener::reason(['reason' => 'spam']));
 	}
 
 	public function test_nothing_is_emitted_for_the_moderator_log_while_the_group_is_off()
@@ -121,16 +129,20 @@ class EntityEventsTest extends TestCase
 		$this->assertSame(['event' => 'user.ban_lifted', 'user_id' => $user->user_id, 'expired' => false], $lifted[0]['context']);
 	}
 
-	public function test_a_failed_login_emits_the_ip_and_never_what_was_typed()
+	public function test_a_failed_login_emits_what_was_typed_and_the_ip()
 	{
 		$this->enableGroup('auth');
 
-		$this->app()->repository('XF:LoginAttempt')->logFailedLogin('hunter2-typed-in-the-wrong-box', '203.0.113.9');
+		$this->app()->repository('XF:LoginAttempt')->logFailedLogin('nobody-by-this-name', '203.0.113.9');
 
 		$records = $this->events->event('login.failed');
 		$this->assertCount(1, $records);
-		$this->assertSame(['event' => 'login.failed', 'user_id' => 0, 'ip' => '203.0.113.9'], $records[0]['context']);
-		$this->assertStringNotContainsString('hunter2', $this->emitted());
+		$this->assertSame([
+			'event' => 'login.failed',
+			'user_id' => 0,
+			'login' => 'nobody-by-this-name',
+			'ip' => '203.0.113.9',
+		], $records[0]['context']);
 	}
 
 	public function test_a_failed_login_names_the_member_whose_account_was_tried()

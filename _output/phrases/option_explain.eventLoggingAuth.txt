@@ -1,1 +1,1 @@
-Records each failed login, with the IP address it came from and the ID of the member whose account was tried. The name or email address entered is never recorded.
+Records each failed login: the name or email address entered, the member it matches, and the IP address it came from. People sometimes type a password into the name field, and it is recorded as typed.

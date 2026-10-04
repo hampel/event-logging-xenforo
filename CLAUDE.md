@@ -55,12 +55,17 @@ costs one option read and no queries.
 **Identifiers, plus what an administrator needs to read the line — never content, and never a
 secret.** Simon's decision, 2026-10-04: the readers are administrators, who can see most of this
 on the forum anyway, and a log that says only "user 12, post 90211" sends them there for every
-line. So a record may hold a content title, a ban reason, an email's recipients and subject.
+line. So a record may hold a content title and its author's username, the reason a moderator
+gave, an email's recipients and subject, and what was typed into a failed login.
 
 **What still never appears, at any level:** a message body — post, conversation or email — a
-submitted form, a password, token, key or session ID, what was typed into a failed login, and a
-payment's details. An email body is where the reset and confirmation links are; a link that acts
-as a credential is the line.
+submitted form, a password, token, key or session ID, and a payment's details. An email body is
+where the reset and confirmation links are; a link that acts as a credential is the line.
+
+**`login.failed` carries what was typed, which is sometimes a password in the wrong field.** That
+is the one place a credential can reach a record, accepted knowingly for the troubleshooting value
+and stated in the README and the option's explanation. It is not a precedent for logging a field
+that is a credential by design.
 
 **Every field that can hold personal data is listed in the README's *Privacy* table**, by group.
 This is a published add-on, so that table is what a forum owner reads before turning a group on;
@@ -69,7 +74,7 @@ a new such field is added there, and to the option's explanation, in the same co
 **The traps, each with a test that fails if it is walked into:**
 
 - the admin log's `request_data` is the submitted form, which on a user edit includes a password;
-- the login attempt's `login` is what was typed, which is sometimes a password;
+- the moderator log's `action_params` is per-action detail; only its `reason` is taken;
 - the error log's `request_state` holds the request's whole `_GET` and `_POST`;
 - the spam trigger log's `details` and the payment log's `log_details` hold submitted content;
 - an email's body holds password-reset and confirmation links.

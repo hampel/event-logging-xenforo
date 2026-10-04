@@ -9,7 +9,8 @@ use XF\Mvc\Entity\Entity;
  * log has neither and is read on a cron.
  *
  * Each record carries identifiers, plus the few things an administrator needs to read a line
- * without opening the forum: the content's title and a ban's reason. Never the content itself,
+ * without opening the forum: the content's title and author, the reason a moderator gave, and
+ * what was typed into a failed login. Never the content itself,
  * nor anything a member submitted.
  */
 class Listener
@@ -27,11 +28,14 @@ class Listener
 			'content_type' => $entity->content_type,
 			'content_id' => (int) $entity->content_id,
 			'content_user_id' => (int) $entity->content_user_id,
+			'content_username' => (string) $entity->content_username,
 			// as stored: the entity's getter censors it for display
 			'content_title' => (string) $entity->getValue('content_title'),
 			'discussion_content_type' => $entity->discussion_content_type,
 			'discussion_content_id' => (int) $entity->discussion_content_id,
 			'action' => $entity->action,
+			// the one parameter worth reading; the rest are per-action detail kept in the forum
+			'reason' => self::reason($entity->action_params),
 		]);
 	}
 
@@ -42,8 +46,8 @@ class Listener
 			return;
 		}
 
-		// the name or address entered is not logged: it is personal data, and sometimes a password
-		// typed into the wrong field. The member it matches, if any, is what a reader needs.
+		// what was typed is logged as typed - it is how an administrator tells a mistyped name from
+		// an attack on one account - alongside the member it matches, if any
 		$user = null;
 		try
 		{
@@ -55,6 +59,7 @@ class Listener
 
 		Emitter::emit('auth', 'login.failed', 'Login failed', [
 			'user_id' => $user ? (int) $user->user_id : 0,
+			'login' => (string) $entity->login,
 			'ip' => self::ip($entity->ip_address),
 		]);
 	}
@@ -141,6 +146,16 @@ class Listener
 		}
 
 		Emitter::emit('api', 'api.request', 'API request', $context);
+	}
+
+	/**
+	 * The reason a moderator gave, where the action has one; null where it has none.
+	 */
+	public static function reason($params): ?string
+	{
+		$reason = is_array($params) ? ($params['reason'] ?? null) : null;
+
+		return is_string($reason) && $reason !== '' ? $reason : null;
 	}
 
 	/**

@@ -29,9 +29,8 @@ these events, so check that against your privacy policy before you start.
 A record holds identifiers — a user ID, a content type and ID, an action — and the few details
 needed to read it without opening the forum. These are never recorded, by any event:
 
-- passwords, API keys, tokens, session IDs and cookies;
+- passwords — but see the Failed logins group below — API keys, tokens, session IDs and cookies;
 - the content of a post, conversation, email or submitted form;
-- what was typed into a failed login;
 - a payment's details, or the data a payment provider sent.
 
 **Personal data is recorded by the events that are about it**, and by no others:
@@ -39,14 +38,18 @@ needed to read it without opening the forum. These are never recorded, by any ev
 | group | records |
 |---|---|
 | Email | **each recipient's email address**, and the subject |
-| Moderation | the title of the content acted on, and the reason given for a ban |
-| Failed logins, Spam triggers | the IP address |
+| Moderation | the title and author's username of the content acted on, and the reason given |
+| Failed logins | **what was typed as the name or email address**, and the IP address |
+| Spam triggers | the IP address |
 | Admin actions, API requests | the page address, as `route` |
 | Server errors | the error message |
 
 - **The Email group puts your members' email addresses in the log**, one record per email sent.
   It is the group to think hardest about before turning on.
-- **A title or a ban reason is whatever someone wrote**, so it can name a person.
+- **What is typed into a login form is sometimes a password**, entered in the wrong field. It is
+  recorded as typed, so treat a log with the Failed logins group on as you would one holding
+  credentials.
+- **A title or a reason is whatever someone wrote**, so it can name a person.
 - **XenForo puts a name or title in some page addresses** — `users/alice.12/edit` — so a `route`
   can name a member or a thread. Its parameters are never recorded.
 - **The server error message is exactly as XenForo wrote it.** XenForo puts the recipient's
@@ -89,13 +92,13 @@ alerts should match on `event`, never on the message, which may be reworded.
 
 | group | event | level | fields |
 |---|---|---|---|
-| Moderation | `moderator.action` | info | `moderator_log_id`, `actor_user_id`, `content_type`, `content_id`, `content_user_id`, `content_title`, `discussion_content_type`, `discussion_content_id`, `action` |
+| Moderation | `moderator.action` | info | `moderator_log_id`, `actor_user_id`, `content_type`, `content_id`, `content_user_id`, `content_username`, `content_title`, `discussion_content_type`, `discussion_content_id`, `action`, `reason` |
 | | `user.banned` | info | `user_id`, `actor_user_id`, `permanent`, `end_date`, `triggered`, `reason` |
 | | `user.ban_updated` | info | as `user.banned` |
 | | `user.ban_lifted` | info | `user_id`, `expired` |
 | Admin actions | `admin.action` | info | `admin_log_id`, `actor_user_id`, `route` |
 | Spam triggers | `spam.triggered` | info | `content_type`, `content_id`, `user_id`, `result`, `ip` |
-| Failed logins | `login.failed` | info | `user_id`, `ip` |
+| Failed logins | `login.failed` | info | `user_id`, `login`, `ip` |
 | Server errors | `error.logged` | error | `fingerprint`, `error_id`, `last_error_id`, `count`, `exception_type`, `error_message`, `filename`, `line`, `user_id`, `error_date` |
 | Email | `mail.sent` | info | `recipient_count`, `recipients`, `subject` |
 | | `mail.failed` | warning | as `mail.sent` |
@@ -107,8 +110,10 @@ alerts should match on `event`, never on the message, which may be reworded.
   panel.
 - **`triggered`** on a ban is true when warning points applied it, not a person. **`expired`** on
   `user.ban_lifted` is true when the ban had run out.
-- **`login.failed` carries the member whose account was tried**, or `0` if what was typed matches
-  nobody. What was typed is not recorded: it is sometimes a password.
+- **`login.failed` carries what was typed and the member it matches**, or `0` if it matches
+  nobody.
+- **`reason`** on `moderator.action` is the reason the moderator gave, or `null` where the action
+  has none.
 - **`payment.callback` is a warning** when the provider log entry is an error.
 - **`api.request` is one record per request.** Leave it off for an API client that polls.
 - **Dates** are ISO 8601, in UTC.
@@ -125,10 +130,12 @@ A record, in the JSON format:
         "content_type": "post",
         "content_id": 90211,
         "content_user_id": 12,
+        "content_username": "alice",
         "content_title": "For sale: two tickets",
         "discussion_content_type": "thread",
         "discussion_content_id": 55,
-        "action": "delete_soft"
+        "action": "delete_soft",
+        "reason": "Duplicate listing"
     },
     "level": 200,
     "level_name": "INFO",
