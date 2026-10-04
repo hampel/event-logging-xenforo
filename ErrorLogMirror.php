@@ -26,7 +26,7 @@ class ErrorLogMirror
 	 * error they would be handled, fail the same way, and be logged again - one round per run,
 	 * indefinitely.
 	 */
-	public const SKIP_PREFIXES = ['Monolog:', Emitter::ERROR_PREFIX, "\$config['monolog']"];
+	public const SKIP_PREFIXES = ['Monolog:', Emitter::ERROR_PREFIX];
 
 	/** @var App */
 	protected $app;

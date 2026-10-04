@@ -23,8 +23,9 @@ do not grow this add-on into them.
 depend on, and installing a logging library must not start recording member activity. This one
 says what it does on the label.
 
-**`addon.json` requires `Hampel/Monolog` 5.0.0**, for `channel()`, JSON output and a level per
-channel. Its contract is the PSR-3 logger `channel()` returns and nothing else. `MonologSettings`
+**`addon.json` requires `Hampel/Monolog` 5.0.1**: 5.0.0 for `channel()`, JSON output and a level
+per channel, and 5.0.1 for deduplication by `fingerprint` and a single `Monolog:` prefix on
+every error it logs. Its contract is the PSR-3 logger `channel()` returns and nothing else. `MonologSettings`
 reads that add-on's own classes to report the log file's level and format, which is outside the
 contract — so each read is guarded, only the two commands use it, and emitting an event never
 does.
@@ -127,15 +128,14 @@ event and nothing to extend.
   broken template logs on every page view. The message is in the key because everything
   `\XF::logError()` writes shares the other three.
 - **Each record carries a `fingerprint`** — that same identity, with the message hashed, and
-  never the `error_id`. `Hampel/Monolog` 5.0.1 and later deduplicate email and Slack on it;
-  without one they compare the message, which is the same for every error here, so a different
-  error inside the window would be skipped. 5.0.0 ignores the key.
+  never the `error_id`. `Hampel/Monolog` deduplicates email and Slack on it; without one it
+  compares the message, which is the same for every error here, so a different error inside the
+  window would be skipped.
 - **Rows whose message begins with a `SKIP_PREFIXES` entry are passed over.** They are this
   add-on's or `Hampel/Monolog`'s reports of a failure to log; sent at `error` they are handled,
   fail the same way and are logged again, one round per run. A new `\XF::logError()` in either
-  add-on about a logging failure needs its prefix there. `$config['monolog']` is in the list for
-  `Hampel/Monolog` 5.0.0 only, which this add-on still accepts; from 5.0.1 every row it writes
-  begins `Monolog:`, so that entry can go when the requirement is raised.
+  add-on about a logging failure needs its prefix there. `Hampel/Monolog` prefixes every row it
+  writes `Monolog:`, and has a test that says so.
 - **It is gated on XenForo below 2.4**, which logs errors through Monolog itself and has no such
   table.
 

@@ -175,11 +175,6 @@ class ErrorLogMirrorTest extends TestCase
 	 */
 	public function test_monolog_emails_a_different_error_and_skips_a_repeat()
 	{
-		if (!class_exists(\Hampel\Monolog\Handler\DeduplicatingHandler::class))
-		{
-			$this->markTestSkipped('The installed Monolog add-on is 5.0.0, which ignores the fingerprint.');
-		}
-
 		// the deduplication store lives in XenForo's temp directory; give this test its own
 		$internalData = sys_get_temp_dir() . '/eventlogging-test-' . bin2hex(random_bytes(8));
 		mkdir($internalData);
@@ -230,8 +225,7 @@ class ErrorLogMirrorTest extends TestCase
 		$this->enableGroup('errors');
 		$this->mirror()->run();
 		$this->logError('Monolog: posting to Slack failed - timed out');
-		$this->logError('EventLogging: an event could not be logged - disk full');
-		$last = $this->logError("\$config['monolog']['handlers'] holds an entry that is not callable; it was skipped.");
+		$last = $this->logError('EventLogging: an event could not be logged - disk full');
 
 		$this->assertSame(0, $this->mirror()->run());
 

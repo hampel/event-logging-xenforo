@@ -15,7 +15,7 @@ By [Simon Hampel](https://xenforo.com/community/members/sim.4264/).
 
 - XenForo 2.2 or later
 - PHP 7.4 or later
-- Monolog Logging Service 5.0.0 or later
+- Monolog Logging Service 5.0.1 or later
 
 ## Privacy
 
@@ -157,8 +157,8 @@ Data* on, their IP address and the URL.
 - **Repeats are counted, not repeated.** The same error — same type, file, line and message — logged
   many times between runs is one record, with `count`, and the first and last `error_id`.
 - **`fingerprint` identifies the error, not the entry**: it is the same each time that error is
-  logged. Monolog Logging Service 5.0.1 and later use it so that email and Slack skip a repeat of
-  one error without also skipping a different one. Group and alert on it.
+  logged. Monolog Logging Service uses it so that email and Slack skip a repeat of one error
+  without also skipping a different one. Group and alert on it.
 - **Turning the group on starts from that moment.** Errors already in the log are not sent.
 - **The stack trace and request data are never sent.** `error_id` leads to both in the admin
   control panel.

@@ -88,7 +88,7 @@ class Validate extends Command
 	private function monolog(): void
 	{
 		Emitter::logger() instanceof NullLogger
-			? $this->checkFail('Monolog add-on', 'not installed, disabled, or older than 5.0 - no event is logged')
+			? $this->checkFail('Monolog add-on', 'not installed, disabled, or older than 5.0.1 - no event is logged')
 			: $this->checkOk('Monolog add-on', 'provides the ' . Emitter::CHANNEL . ' channel');
 	}
 

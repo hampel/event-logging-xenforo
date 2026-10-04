@@ -19,8 +19,8 @@
             "XenForo 2.2.0+"
         ],
         "Hampel/Monolog": [
-            5000070,
-            "Monolog Logging Service 5.0.0+"
+            5000170,
+            "Monolog Logging Service 5.0.1+"
         ]
     },
     "icon": "fa-stream"

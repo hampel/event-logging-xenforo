@@ -50,7 +50,7 @@ needs a person.
 
 ## Automated
 
-From the add-on root, inside a XenForo install with Monolog Logging Service 5.0 installed:
+From the add-on root, inside a XenForo install with Monolog Logging Service 5.0.1 installed:
 
 ```bash
 composer install
@@ -65,8 +65,8 @@ event through XenForo's own write path and covers:
 - each event's exact fields;
 - that a submitted form, a token, a post or email body, a spam check's detail and a payment
   provider's data appear in no record;
-- the error log mirror's position, collapsing, fingerprint and skipping, and that Monolog 5.0.1
-  emails a different error and skips a repeat;
+- the error log mirror's position, collapsing, fingerprint and skipping, and that Monolog emails a
+  different error and skips a repeat;
 - both commands;
 - one record through the real Monolog add-on to a JSON file.
 
