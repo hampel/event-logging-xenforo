@@ -2,6 +2,7 @@
 
 use Hampel\EventLogging\XF\Repository\AdminLog;
 use Hampel\Testing\Concerns\UsesDatabaseTransactions;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Component\Mailer\SentMessage;
 use Symfony\Component\Mailer\Transport\AbstractTransport;
 use Tests\TestCase;
@@ -67,10 +68,7 @@ class ExtensionEventsTest extends TestCase
 		return [['XF:UserChecker', 'user', 0], ['XF:ContentChecker', 'post', 42]];
 	}
 
-	/**
-	 * @dataProvider checkers
-	 */
-	#[\PHPUnit\Framework\Attributes\DataProvider('checkers')]
+	#[DataProvider('checkers')]
 	public function test_a_spam_trigger_emits_the_result_and_never_the_content(string $class, string $contentType, int $contentId)
 	{
 		$this->enableGroup('spam');
