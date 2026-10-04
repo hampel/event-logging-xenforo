@@ -107,8 +107,8 @@ class ErrorLogMirror
 	}
 
 	/**
-	 * One record per distinct error, with a count. A broken template logs the same exception on
-	 * every page view; that is one thing to fix, not a thousand.
+	 * One record per distinct error - type, file, line and message - with a count. A broken
+	 * template logs the same exception on every page view; that is one thing to fix, not a thousand.
 	 *
 	 * @return array[] each record's context
 	 */
@@ -122,7 +122,9 @@ class ErrorLogMirror
 				continue;
 			}
 
-			$key = $row['exception_type'] . '|' . $row['filename'] . '|' . $row['line'];
+			// the message is part of what makes an error the same one: everything \XF::logError()
+			// writes shares a type, file and line, because XenForo builds the exception itself
+			$key = $row['exception_type'] . '|' . $row['filename'] . '|' . $row['line'] . '|' . $row['message'];
 			if (isset($errors[$key]))
 			{
 				$errors[$key]['count']++;

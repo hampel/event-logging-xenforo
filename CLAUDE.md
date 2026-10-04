@@ -106,8 +106,9 @@ event and nothing to extend.
 - **Turning the group off deletes the position**, and the first run with none sets it to the
   newest error and sends nothing. Otherwise enabling the group would send every error logged while
   it was off.
-- **Rows of the same type, file and line collapse into one record with a `count`.** A broken
-  template logs on every page view.
+- **Rows of the same type, file, line and message collapse into one record with a `count`.** A
+  broken template logs on every page view. The message is in the key because everything
+  `\XF::logError()` writes shares the other three.
 - **Rows whose message begins with a `SKIP_PREFIXES` entry are passed over.** They are this
   add-on's or `Hampel/Monolog`'s reports of a failure to log; sent at `error` they are handled,
   fail the same way and are logged again, one round per run. A new `\XF::logError()` in either

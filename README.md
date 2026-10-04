@@ -137,8 +137,8 @@ Data* on, their IP address and the URL.
 **New entries in the server error log are sent every five minutes**, by a cron entry, as
 `error.logged` at Error — so they also reach Monolog's email and Slack outputs, if you use them.
 
-- **Repeats are counted, not repeated.** The same error — same type, file and line — logged many
-  times between runs is one record, with `count`, and the first and last `error_id`.
+- **Repeats are counted, not repeated.** The same error — same type, file, line and message — logged
+  many times between runs is one record, with `count`, and the first and last `error_id`.
 - **Turning the group on starts from that moment.** Errors already in the log are not sent.
 - **The stack trace and request data are never sent.** `error_id` leads to both in the admin
   control panel.

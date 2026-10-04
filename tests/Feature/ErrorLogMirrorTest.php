@@ -115,6 +115,27 @@ class ErrorLogMirrorTest extends TestCase
 	}
 
 	/**
+	 * Everything \XF::logError() writes has the same type, file and line - XenForo builds the
+	 * exception itself - so those three alone would merge unrelated errors into one record.
+	 */
+	public function test_different_messages_from_the_same_place_are_different_errors()
+	{
+		$this->enableGroup('errors');
+		$this->mirror()->run();
+		$this->logError('Payment provider rejected the callback', 'ErrorException', 'src/XF/Error.php', 77);
+		$this->logError('Search index is unreachable', 'ErrorException', 'src/XF/Error.php', 77);
+		$this->logError('Search index is unreachable', 'ErrorException', 'src/XF/Error.php', 77);
+
+		$this->assertSame(2, $this->mirror()->run());
+
+		$records = $this->events->event('error.logged');
+		$this->assertSame('Payment provider rejected the callback', $records[0]['context']['error_message']);
+		$this->assertSame(1, $records[0]['context']['count']);
+		$this->assertSame('Search index is unreachable', $records[1]['context']['error_message']);
+		$this->assertSame(2, $records[1]['context']['count']);
+	}
+
+	/**
 	 * A row about a failure to log, sent at error, is handled, fails the same way and is logged
 	 * again - one round per run.
 	 */
