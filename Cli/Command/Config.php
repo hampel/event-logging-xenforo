@@ -4,6 +4,7 @@ use Hampel\EventLogging\Cli\RendersReport;
 use Hampel\EventLogging\Emitter;
 use Hampel\EventLogging\ErrorLogMirror;
 use Hampel\EventLogging\MonologSettings;
+use Psr\Log\NullLogger;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -38,13 +39,23 @@ class Config extends Command
 
 		$this->heading('Log file');
 		$this->detail('channel', Emitter::CHANNEL);
-		$this->detail('path', (string) MonologSettings::filePath());
 
-		$level = MonologSettings::fileLevel();
-		$this->detail('level', $level === null ? '' : MonologSettings::levelName($level) . ' ' . $this->muted(
-			MonologSettings::hasChannelLevel() ? "(config.php, for the " . Emitter::CHANNEL . ' channel)' : '(every channel)'
-		));
-		$this->detail('format', (string) MonologSettings::format());
+		if (Emitter::logger() instanceof NullLogger)
+		{
+			// its options are still in the database and still readable, and describe a log file
+			// nothing is being written to
+			$this->detail('Monolog add-on', '<error>not installed, disabled, or older than 5.0.1 - no event is logged</error>');
+		}
+		else
+		{
+			$this->detail('path', (string) MonologSettings::filePath());
+
+			$level = MonologSettings::fileLevel();
+			$this->detail('level', $level === null ? '' : MonologSettings::levelName($level) . ' ' . $this->muted(
+				MonologSettings::hasChannelLevel() ? "(config.php, for the " . Emitter::CHANNEL . ' channel)' : '(every channel)'
+			));
+			$this->detail('format', (string) MonologSettings::format());
+		}
 
 		$this->heading('Server error log');
 		if (!ErrorLogMirror::isSupported())

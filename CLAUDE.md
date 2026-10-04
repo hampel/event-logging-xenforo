@@ -48,6 +48,12 @@ display orders from 2010 so they follow Monolog's last block at 1000; the group 
 the other add-on and is never created, edited or removed here. `xf-make:option --group=monolog`
 adds another.
 
+**With `Hampel/Monolog` disabled, events go to a `NullLogger` and nothing else changes.** XenForo
+checks a requirement at install and upgrade only, so an admin can disable Monolog and leave this
+add-on on, with every group on. `MonologAbsentTest` loads this add-on alone to prove each capture
+type still completes. Both commands say so rather than describing Monolog's log file: a disabled
+add-on's options stay in the database, and still read as though they applied.
+
 **Call sites check `Emitter::enabled()` before building the context**, so a group that is off
 costs one option read and no queries.
 
