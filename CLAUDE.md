@@ -40,6 +40,13 @@ is off emits nothing, and every option defaults to off: installing the add-on mu
 thing that starts recording. `EmitterTest` fails if an option's default changes or an event is
 missing from the README.
 
+**The options sit in `Hampel/Monolog`'s option group, `monolog`, not in one of this add-on's
+own.** They only make sense beside Monolog's, and a separate *Event logging* page read as a
+sibling of XenForo's own *Logging options*. Each option's `relations` names `monolog`, with
+display orders from 2010 so they follow Monolog's last block at 1000; the group itself belongs to
+the other add-on and is never created, edited or removed here. `xf-make:option --group=monolog`
+adds another.
+
 **Call sites check `Emitter::enabled()` before building the context**, so a group that is off
 costs one option read and no queries.
 

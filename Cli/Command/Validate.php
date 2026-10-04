@@ -98,7 +98,7 @@ class Validate extends Command
 
 		$on
 			? $this->checkOk('event groups', count($on) . ' of ' . count(Emitter::GROUPS) . ' on: ' . implode(', ', $on))
-			: $this->checkSkip('event groups', 'none is on - nothing is emitted until one is, under Options > Event logging');
+			: $this->checkSkip('event groups', 'none is on - nothing is emitted until one is, under Options > Monolog');
 	}
 
 	/**

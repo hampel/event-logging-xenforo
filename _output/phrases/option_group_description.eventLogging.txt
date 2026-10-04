@@ -1,1 +1,0 @@
-Choose which events are sent to your logs. Every group is off until you turn it on.

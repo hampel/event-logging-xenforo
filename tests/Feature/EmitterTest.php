@@ -21,6 +21,36 @@ class EmitterTest extends TestCase
 		}
 	}
 
+	/**
+	 * The options only make sense beside Monolog's, so they are on its page, after its own.
+	 */
+	public function test_every_option_is_on_the_monolog_options_page_after_monologs_own()
+	{
+		$group = $this->app()->em()->find('XF:OptionGroup', 'monolog');
+		$this->assertNotNull($group);
+		$this->assertSame('Hampel/Monolog', $group->addon_id);
+
+		$orders = $this->app()->db()->fetchPairs('
+			SELECT o.option_id, r.display_order
+			FROM xf_option_group_relation AS r
+			INNER JOIN xf_option AS o ON (o.option_id = r.option_id)
+			WHERE r.group_id = ? AND o.addon_id = ?
+		', ['monolog', 'Hampel/EventLogging']);
+		$this->assertCount(count(Emitter::GROUPS), $orders);
+
+		$monologsLast = (int) $this->app()->db()->fetchOne('
+			SELECT MAX(r.display_order)
+			FROM xf_option_group_relation AS r
+			INNER JOIN xf_option AS o ON (o.option_id = r.option_id)
+			WHERE r.group_id = ? AND o.addon_id = ?
+		', ['monolog', 'Hampel/Monolog']);
+		$this->assertGreaterThan($monologsLast, min($orders));
+
+		$this->assertSame(0, (int) $this->app()->db()->fetchOne(
+			'SELECT COUNT(*) FROM xf_option_group WHERE addon_id = ?', 'Hampel/EventLogging'
+		), 'this add-on has no option group of its own');
+	}
+
 	public function test_a_group_that_is_off_emits_nothing()
 	{
 		foreach (array_keys(Emitter::GROUPS) AS $group)

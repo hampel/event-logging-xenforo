@@ -67,7 +67,8 @@ $config['monolog'] = [
 - **`format`** is optional. A log collector can only read an event's fields from JSON; the line
   format keeps them as text.
 
-Last, turn on the groups you want under *Options > Event logging*, and check the result:
+Last, turn on the groups you want under *Options > Monolog*, where this add-on's options follow
+Monolog's own, and check the result:
 
 ```bash
 php cmd.php event-logging:validate

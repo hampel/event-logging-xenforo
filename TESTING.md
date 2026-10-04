@@ -20,7 +20,8 @@ needs a person.
 
 **Other artifacts**
 
-- Options: eight, in the `eventLogging` group, all boolean and all off by default.
+- Options: eight, all boolean and all off by default, in the `monolog` option group — which
+  belongs to Monolog Logging Service. This add-on has no option group of its own.
 - Cron entry: `eventLoggingErrorLog`, every five minutes.
 - CLI commands: `event-logging:config` and `event-logging:validate`.
 - Simple cache: one value, the last server error sent.

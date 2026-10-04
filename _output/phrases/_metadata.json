@@ -100,17 +100,5 @@
         "version_id": 1000011,
         "version_string": "1.0.0a1",
         "hash": "3e7ba9c7bdb049d0d370c611de2c01a4"
-    },
-    "option_group.eventLogging.txt": {
-        "global_cache": false,
-        "version_id": 1000011,
-        "version_string": "1.0.0a1",
-        "hash": "a56f45c58994922e3109131d37ff6a48"
-    },
-    "option_group_description.eventLogging.txt": {
-        "global_cache": false,
-        "version_id": 1000011,
-        "version_string": "1.0.0a1",
-        "hash": "6fb3ac1fd85a63375900298de2d946ee"
     }
 }
