@@ -68,14 +68,6 @@ class EntityEventsTest extends TestCase
 		$this->assertStringNotContainsString('earlier name', $this->emitted());
 	}
 
-	public function test_a_moderator_action_with_no_reason_has_a_null_reason()
-	{
-		$this->assertNull(\Hampel\EventLogging\Listener::reason([]));
-		$this->assertNull(\Hampel\EventLogging\Listener::reason(['reason' => '']));
-		$this->assertNull(\Hampel\EventLogging\Listener::reason(''));
-		$this->assertSame('spam', \Hampel\EventLogging\Listener::reason(['reason' => 'spam']));
-	}
-
 	public function test_nothing_is_emitted_for_the_moderator_log_while_the_group_is_off()
 	{
 		$this->moderatorLog();

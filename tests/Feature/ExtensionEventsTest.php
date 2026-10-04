@@ -62,14 +62,6 @@ class ExtensionEventsTest extends TestCase
 		$this->assertDatabaseHas('xf_admin_log', ['admin_log_id' => $logId]);
 	}
 
-	public function test_the_route_is_taken_from_the_query_string_without_its_parameters()
-	{
-		$this->assertSame('users/1/save', AdminLog::route('/admin.php?users/1/save'));
-		$this->assertSame('users/1/save', AdminLog::route('/forum/admin.php?users/1/save&a=b&c=d'));
-		$this->assertSame('', AdminLog::route('/admin.php'));
-		$this->assertSame('', AdminLog::route('/admin.php?a=b'), 'a parameter is not a route');
-	}
-
 	public static function checkers(): array
 	{
 		return [['XF:UserChecker', 'user', 0], ['XF:ContentChecker', 'post', 42]];
@@ -141,31 +133,6 @@ class ExtensionEventsTest extends TestCase
 		], $records[0]['context']);
 
 		$this->assertStringNotContainsString('secret-token', $this->emitted());
-	}
-
-	/**
-	 * XenForo 2.2 sends a Swift message, whose getTo() is address => name, not a list of objects.
-	 */
-	public function test_a_swift_style_message_is_described_the_same_way()
-	{
-		$message = new class
-		{
-			public function getTo()
-			{
-				return ['alice@example.com' => 'Alice', 'bob@example.com' => null];
-			}
-
-			public function getSubject()
-			{
-				return 'Hello';
-			}
-		};
-
-		$this->assertSame([
-			'recipient_count' => 2,
-			'recipients' => ['alice@example.com', 'bob@example.com'],
-			'subject' => 'Hello',
-		], \Hampel\EventLogging\XF\Mail\Mailer::describe($message));
 	}
 
 	public function test_an_email_the_transport_rejects_emits_mail_failed_as_a_warning()

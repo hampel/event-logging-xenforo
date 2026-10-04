@@ -161,6 +161,12 @@ composer install            # first time; vendor/ is gitignored
 vendor/bin/phpunit
 ```
 
+**`tests/Unit` holds the pure functions** — the admin route, the moderator's reason, the stored IP,
+the mail description and the error fingerprint — and `tests/Feature` everything that drives
+XenForo's own write path. A unit test of a class under `XF/` calls `extendClass()` on its parent
+first: the class extends a proxy XenForo only creates when it resolves the extension, so without
+that the test passes in a full run and fails alone.
+
 **The suite replaces the `events` channel with a recording logger** (`tests/RecordingLogger.php`,
 through `Emitter::setLogger()`), so nothing reaches a real log file, and turns every group off
 before each test. One test in `EmitterTest` goes through the real Monolog add-on to a temporary
