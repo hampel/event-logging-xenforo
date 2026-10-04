@@ -1,0 +1,14 @@
+{
+    "XF-Mail-Mailer_Hampel-MonologEvents-XF-Mail-Mailer.json": {
+        "hash": "7a0c1aab4b9a52d20f2dbd663d4732f5"
+    },
+    "XF-Repository-AdminLog_Hampel-MonologEvents-XF-Repository-AdminLog.json": {
+        "hash": "4040575d8766b47ad066289f711a413c"
+    },
+    "XF-Spam-ContentChecker_Hampel-MonologEvents-XF-Spam-ContentChecker.json": {
+        "hash": "e8f27cecc42b5d86c92096141c7c2df0"
+    },
+    "XF-Spam-UserChecker_Hampel-MonologEvents-XF-Spam-UserChecker.json": {
+        "hash": "aca872fe4fc5d73c20747f133b58ca3a"
+    }
+}

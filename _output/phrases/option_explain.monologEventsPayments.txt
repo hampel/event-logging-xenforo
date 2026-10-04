@@ -1,0 +1,1 @@
+Records each entry XenForo adds to the payment provider log: the provider, the type of entry and the transaction ID. The callback's contents are never recorded.

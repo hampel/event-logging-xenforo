@@ -1,0 +1,1 @@
+Records each failed login, with the IP address it came from and the ID of the member whose account was tried. The name or email address entered is never recorded.

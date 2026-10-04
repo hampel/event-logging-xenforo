@@ -1,0 +1,28 @@
+{
+    "cron_class": "Hampel\\MonologEvents\\Cron\\ErrorLog",
+    "cron_method": "mirror",
+    "run_rules": {
+        "minutes": [
+            0,
+            5,
+            10,
+            15,
+            20,
+            25,
+            30,
+            35,
+            40,
+            45,
+            50,
+            55
+        ],
+        "hours": [
+            -1
+        ],
+        "day_type": "dow",
+        "dow": [
+            -1
+        ]
+    },
+    "active": true
+}

@@ -1,0 +1,1 @@
+Records each registration or message that XenForo's spam checks rejected or sent for moderation. A record holds the IP address the attempt came from.

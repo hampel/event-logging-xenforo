@@ -1,0 +1,1 @@
+Records each change an administrator submits in the admin control panel: who, and which page. The submitted form is never recorded.

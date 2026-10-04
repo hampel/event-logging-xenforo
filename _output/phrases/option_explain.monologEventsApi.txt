@@ -1,0 +1,1 @@
+Records each request to the REST API: the API key's ID, the member it acted as, the method, route and response status. This is one record per request - leave it off for an API client that polls.

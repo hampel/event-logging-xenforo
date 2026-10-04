@@ -1,0 +1,1 @@
+Copies new entries from the server error log every five minutes, as errors. Repeats of the same error are counted into one record. The error message is copied as XenForo wrote it, and may hold personal data; the stack trace and request data are never copied.

@@ -1,0 +1,66 @@
+<?php namespace Hampel\MonologEvents\Cli\Command;
+
+use Hampel\MonologEvents\Cli\RendersReport;
+use Hampel\MonologEvents\Emitter;
+use Hampel\MonologEvents\ErrorLogMirror;
+use Hampel\MonologEvents\MonologSettings;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
+
+/**
+ * Which events this forum sends to its logs, and whether the log file will take them. It reads
+ * and prints; it writes nothing. monolog-events:validate is the command that finds out whether
+ * any of it works.
+ */
+class Config extends Command
+{
+	use RendersReport;
+
+	protected function configure()
+	{
+		$this
+			->setName('monolog-events:config')
+			->setDescription('Show which events this forum sends to its logs');
+	}
+
+	protected function execute(InputInterface $input, OutputInterface $output)
+	{
+		$this->report = $output;
+
+		$this->heading('Event groups');
+		foreach (Emitter::GROUPS AS $group => $definition)
+		{
+			$this->detail($group, Emitter::enabled($group)
+				? '<info>on</info> ' . $this->muted('- ' . implode(', ', $definition['events']))
+				: $this->muted('off'));
+		}
+
+		$this->heading('Log file');
+		$this->detail('channel', Emitter::CHANNEL);
+		$this->detail('path', (string) MonologSettings::filePath());
+
+		$level = MonologSettings::fileLevel();
+		$this->detail('level', $level === null ? '' : MonologSettings::levelName($level) . ' ' . $this->muted(
+			MonologSettings::hasChannelLevel() ? "(config.php, for the " . Emitter::CHANNEL . ' channel)' : '(every channel)'
+		));
+		$this->detail('format', (string) MonologSettings::format());
+
+		$this->heading('Server error log');
+		if (!ErrorLogMirror::isSupported())
+		{
+			$this->detail('mirror', 'not used - XenForo ' . \XF::$version . ' logs its errors through Monolog itself');
+		}
+		else
+		{
+			$cache = \XF::app()->simpleCache()->getSet('Hampel/MonologEvents');
+			$this->detail('mirror', Emitter::enabled('errors') ? 'on' : $this->muted('off'));
+			$this->detail('last error sent', $cache->keyExists(ErrorLogMirror::CACHE_KEY)
+				? '#' . (int) $cache->getValue(ErrorLogMirror::CACHE_KEY) : '');
+		}
+
+		$this->report->writeln('');
+
+		return 0;
+	}
+}

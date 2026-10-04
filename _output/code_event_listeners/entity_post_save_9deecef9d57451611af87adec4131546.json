@@ -1,0 +1,9 @@
+{
+    "event_id": "entity_post_save",
+    "execute_order": 10,
+    "callback_class": "Hampel\\MonologEvents\\Listener",
+    "callback_method": "moderatorLogPostSave",
+    "active": true,
+    "hint": "XF\\Entity\\ModeratorLog",
+    "description": "Emit moderator.action for each new moderator log entry"
+}

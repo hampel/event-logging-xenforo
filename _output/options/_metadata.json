@@ -1,0 +1,26 @@
+{
+    "monologEventsAdmin.json": {
+        "hash": "cfa7b1ab68d574e45da625374f78cff3"
+    },
+    "monologEventsApi.json": {
+        "hash": "a1d30cc7bd6590bf4acb77ff4d20ad68"
+    },
+    "monologEventsAuth.json": {
+        "hash": "96fd325e0910c541509b89dad0bc1e03"
+    },
+    "monologEventsErrors.json": {
+        "hash": "f42e7da6e40d9b9e476de4fbf333b4ce"
+    },
+    "monologEventsMail.json": {
+        "hash": "5694a0cfa64e4b9b3a27ef9688395cf9"
+    },
+    "monologEventsModeration.json": {
+        "hash": "bfc175dcb9a81be0121b35f6fc35a20b"
+    },
+    "monologEventsPayments.json": {
+        "hash": "d8954e0dc8f07ece87320094700dc156"
+    },
+    "monologEventsSpam.json": {
+        "hash": "f0d16c06af01acf2ef09abfedc524b3a"
+    }
+}

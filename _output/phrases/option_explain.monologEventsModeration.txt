@@ -1,0 +1,1 @@
+Records each entry XenForo adds to the moderator log, and each member ban applied, changed or lifted. A record holds the moderator, the content type and ID, and the action - never the content, its title or the reason given.

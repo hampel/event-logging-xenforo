@@ -1,0 +1,21 @@
+{
+	"description": "Event logging for XenForo, through the Monolog Logging Service add-on",
+	"license": "MIT",
+	"require": {
+		"php": ">=7.4"
+	},
+	"require-dev": {
+		"hampel/xenforo-test-framework": "^5.5",
+		"phpunit/phpunit": "^12.0"
+	},
+	"autoload-dev": {
+		"psr-4": {
+			"Tests\\": "tests/"
+		}
+	},
+	"config": {
+		"platform": {
+			"php": "8.3"
+		}
+	}
+}

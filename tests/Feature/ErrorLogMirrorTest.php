@@ -1,0 +1,180 @@
+<?php namespace Tests\Feature;
+
+use Hampel\MonologEvents\ErrorLogMirror;
+use Hampel\Testing\Concerns\UsesDatabaseTransactions;
+use Tests\TestCase;
+
+class ErrorLogMirrorTest extends TestCase
+{
+	use UsesDatabaseTransactions;
+
+	private function mirror(): ErrorLogMirror
+	{
+		return new ErrorLogMirror($this->app());
+	}
+
+	private function logError(string $message, string $type = 'ErrorException', string $file = 'src/addons/Foo/Bar.php', int $line = 10): int
+	{
+		$db = $this->app()->db();
+		$db->insert('xf_error_log', [
+			'exception_date' => 1893456000,
+			'user_id' => 5,
+			'ip_address' => '',
+			'exception_type' => $type,
+			'message' => $message,
+			'filename' => $file,
+			'line' => $line,
+			'trace_string' => '#0 secret-in-the-trace',
+			'request_state' => json_encode(['url' => '/', '_POST' => ['password' => 'correct-horse']]),
+		]);
+
+		return (int) $db->lastInsertId();
+	}
+
+	private function position()
+	{
+		return $this->app()->simpleCache()->getValue('Hampel/MonologEvents', ErrorLogMirror::CACHE_KEY);
+	}
+
+	/**
+	 * Turning the group on must not send everything already in the error log.
+	 */
+	public function test_the_first_run_starts_from_the_newest_error_and_sends_nothing()
+	{
+		$this->enableGroup('errors');
+		$id = $this->logError('Before the mirror was on');
+
+		$this->assertSame(0, $this->mirror()->run());
+
+		$this->assertSame([], $this->events->records);
+		$this->assertSame($id, $this->position());
+	}
+
+	public function test_a_new_error_is_sent_at_error_with_the_fact_and_not_the_row()
+	{
+		$this->enableGroup('errors');
+		$this->mirror()->run();
+		$id = $this->logError('Template public:thread_view failed');
+
+		$this->assertSame(1, $this->mirror()->run());
+
+		$records = $this->events->event('error.logged');
+		$this->assertCount(1, $records);
+		$this->assertSame('error', $records[0]['level']);
+		$this->assertSame('Server error logged', $records[0]['message']);
+		$this->assertSame([
+			'event' => 'error.logged',
+			'error_id' => $id,
+			'last_error_id' => $id,
+			'count' => 1,
+			'exception_type' => 'ErrorException',
+			'error_message' => 'Template public:thread_view failed',
+			'filename' => 'src/addons/Foo/Bar.php',
+			'line' => 10,
+			'user_id' => 5,
+			'error_date' => '2030-01-01T00:00:00+00:00',
+		], $records[0]['context']);
+
+		$this->assertStringNotContainsString('correct-horse', $this->emitted(), 'request_state is not sent');
+		$this->assertStringNotContainsString('secret-in-the-trace', $this->emitted(), 'the trace is not sent');
+		$this->assertSame($id, $this->position());
+	}
+
+	public function test_an_error_is_sent_once()
+	{
+		$this->enableGroup('errors');
+		$this->mirror()->run();
+		$this->logError('Once');
+
+		$this->mirror()->run();
+		$this->assertSame(0, $this->mirror()->run());
+
+		$this->assertCount(1, $this->events->event('error.logged'));
+	}
+
+	/**
+	 * A broken template logs the same exception on every page view.
+	 */
+	public function test_a_storm_of_the_same_error_is_one_record_with_a_count()
+	{
+		$this->enableGroup('errors');
+		$this->mirror()->run();
+		$first = $this->logError('Same');
+		$this->logError('Same');
+		$other = $this->logError('Different', 'TypeError', 'src/addons/Foo/Baz.php', 3);
+		$last = $this->logError('Same');
+
+		$this->assertSame(2, $this->mirror()->run());
+
+		$records = $this->events->event('error.logged');
+		$this->assertSame(3, $records[0]['context']['count']);
+		$this->assertSame($first, $records[0]['context']['error_id']);
+		$this->assertSame($last, $records[0]['context']['last_error_id']);
+		$this->assertSame(1, $records[1]['context']['count']);
+		$this->assertSame($other, $records[1]['context']['error_id']);
+	}
+
+	/**
+	 * A row about a failure to log, sent at error, is handled, fails the same way and is logged
+	 * again - one round per run.
+	 */
+	public function test_the_logging_add_ons_own_failures_are_not_sent()
+	{
+		$this->enableGroup('errors');
+		$this->mirror()->run();
+		$this->logError('Monolog: posting to Slack failed - timed out');
+		$this->logError('MonologEvents: an event could not be logged - disk full');
+		$last = $this->logError("\$config['monolog']['handlers'] holds an entry that is not callable; it was skipped.");
+
+		$this->assertSame(0, $this->mirror()->run());
+
+		$this->assertSame([], $this->events->records);
+		$this->assertSame($last, $this->position(), 'they are passed over, not retried');
+	}
+
+	public function test_a_long_message_is_cut()
+	{
+		$this->enableGroup('errors');
+		$this->mirror()->run();
+		$this->logError(str_repeat('x', 5000));
+
+		$this->mirror()->run();
+
+		$this->assertSame(ErrorLogMirror::MESSAGE_LENGTH, strlen($this->events->event('error.logged')[0]['context']['error_message']));
+	}
+
+	public function test_turning_the_group_off_forgets_the_position()
+	{
+		$this->enableGroup('errors');
+		$this->mirror()->run();
+		$this->assertNotNull($this->position());
+
+		$this->setOption('monologEventsErrors', false);
+		$this->logError('While it was off');
+		$this->mirror()->run();
+
+		$this->assertNull($this->position());
+		$this->assertSame([], $this->events->records);
+	}
+
+	public function test_an_emptied_error_log_starts_again_from_its_first_row()
+	{
+		$this->enableGroup('errors');
+		$id = $this->logError('After the log was cleared');
+		$this->app()->simpleCache()->setValue('Hampel/MonologEvents', ErrorLogMirror::CACHE_KEY, $id + 1000);
+
+		$this->mirror()->run();
+
+		$sent = array_column(array_column($this->events->event('error.logged'), 'context'), 'last_error_id');
+		$this->assertContains($id, $sent);
+	}
+
+	public function test_the_cron_entry_runs_the_mirror()
+	{
+		$entry = $this->app()->em()->find('XF:CronEntry', 'monologEventsErrorLog');
+
+		$this->assertNotNull($entry);
+		$this->assertTrue($entry->active);
+		$this->assertTrue(is_callable([$entry->cron_class, $entry->cron_method]));
+	}
+}
