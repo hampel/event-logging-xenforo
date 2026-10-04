@@ -15,24 +15,47 @@ class Mailer extends XFCP_Mailer
 
 		if (Emitter::enabled('mail'))
 		{
-			// a count, never an address, the subject or the body
-			$recipients = null;
-			try
-			{
-				$to = method_exists($message, 'getTo') ? $message->getTo() : null;
-				$recipients = is_array($to) ? count($to) : null;
-			}
-			catch (\Throwable $e)
-			{
-			}
+			$context = self::describe($message);
 
 			// a failure is a warning: XenForo has already written the exception to the server
 			// error log, and a queued email is tried again
 			$sent
-				? Emitter::emit('mail', 'mail.sent', 'Email sent', ['recipient_count' => $recipients])
-				: Emitter::emit('mail', 'mail.failed', 'Email failed', ['recipient_count' => $recipients], LogLevel::WARNING);
+				? Emitter::emit('mail', 'mail.sent', 'Email sent', $context)
+				: Emitter::emit('mail', 'mail.failed', 'Email failed', $context, LogLevel::WARNING);
 		}
 
 		return $sent;
+	}
+
+	/**
+	 * Who an email is to and what it is called - what is needed to answer "did the forum send it?".
+	 * Never the body: it is where a password reset or confirmation link is.
+	 *
+	 * Swift's getTo() is address => name; Symfony's is a list of Address objects.
+	 */
+	public static function describe($message): array
+	{
+		$recipients = [];
+		$subject = null;
+
+		try
+		{
+			$to = method_exists($message, 'getTo') ? $message->getTo() : [];
+			foreach ((array) $to AS $key => $value)
+			{
+				$recipients[] = is_object($value) ? $value->getAddress() : (string) $key;
+			}
+
+			$subject = method_exists($message, 'getSubject') ? $message->getSubject() : null;
+		}
+		catch (\Throwable $e)
+		{
+		}
+
+		return [
+			'recipient_count' => count($recipients),
+			'recipients' => $recipients,
+			'subject' => $subject === null ? null : (string) $subject,
+		];
 	}
 }

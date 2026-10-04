@@ -115,7 +115,11 @@ class ExtensionEventsTest extends TestCase
 		$this->assertSame([], $this->events->records);
 	}
 
-	public function test_an_email_emits_mail_sent_with_a_count_and_no_address()
+	/**
+	 * Who it went to and what it was called, to answer "did the forum send it?" - and never the
+	 * body, which is where a reset link is.
+	 */
+	public function test_an_email_emits_mail_sent_with_its_recipients_and_subject_and_never_its_body()
 	{
 		$this->fakesMail();
 		$this->enableGroup('mail');
@@ -129,11 +133,39 @@ class ExtensionEventsTest extends TestCase
 		$records = $this->events->event('mail.sent');
 		$this->assertCount(1, $records);
 		$this->assertSame('info', $records[0]['level']);
-		$this->assertSame(['event' => 'mail.sent', 'recipient_count' => 1], $records[0]['context']);
+		$this->assertSame([
+			'event' => 'mail.sent',
+			'recipient_count' => 1,
+			'recipients' => ['alice@example.com'],
+			'subject' => 'Your reset link',
+		], $records[0]['context']);
 
-		$this->assertStringNotContainsString('alice@example.com', $this->emitted());
-		$this->assertStringNotContainsString('reset link', $this->emitted());
 		$this->assertStringNotContainsString('secret-token', $this->emitted());
+	}
+
+	/**
+	 * XenForo 2.2 sends a Swift message, whose getTo() is address => name, not a list of objects.
+	 */
+	public function test_a_swift_style_message_is_described_the_same_way()
+	{
+		$message = new class
+		{
+			public function getTo()
+			{
+				return ['alice@example.com' => 'Alice', 'bob@example.com' => null];
+			}
+
+			public function getSubject()
+			{
+				return 'Hello';
+			}
+		};
+
+		$this->assertSame([
+			'recipient_count' => 2,
+			'recipients' => ['alice@example.com', 'bob@example.com'],
+			'subject' => 'Hello',
+		], \Hampel\EventLogging\XF\Mail\Mailer::describe($message));
 	}
 
 	public function test_an_email_the_transport_rejects_emits_mail_failed_as_a_warning()
@@ -164,6 +196,8 @@ class ExtensionEventsTest extends TestCase
 		$records = $this->events->event('mail.failed');
 		$this->assertCount(1, $records);
 		$this->assertSame('warning', $records[0]['level']);
+		$this->assertSame(['alice@example.com'], $records[0]['context']['recipients']);
+		$this->assertSame('Subject', $records[0]['context']['subject']);
 		$this->assertSame([], $this->events->event('mail.sent'));
 	}
 

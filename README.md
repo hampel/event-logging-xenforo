@@ -26,24 +26,32 @@ about what your forum logs.
 that record is kept: a log file, and wherever you ship it. Whoever can read those logs can read
 these events, so check that against your privacy policy before you start.
 
-A record holds identifiers — a user ID, a content type and ID, an action. These are never
-recorded, by any event:
+A record holds identifiers — a user ID, a content type and ID, an action — and the few details
+needed to read it without opening the forum. These are never recorded, by any event:
 
 - passwords, API keys, tokens, session IDs and cookies;
 - the content of a post, conversation, email or submitted form;
-- email addresses, or a username as a field of its own;
-- the reason given for a ban or a moderator action, or the title of the content;
+- what was typed into a failed login;
 - a payment's details, or the data a payment provider sent.
 
-Three kinds of personal data are recorded, each only by the events that are about it:
+**Personal data is recorded by the events that are about it**, and by no others:
 
-- **IP addresses**, by `login.failed` and `spam.triggered`.
-- **The page address**, by `admin.action` and `api.request`, as `route`. XenForo puts a name or
-  title in some addresses — `users/alice.12/edit` — so a route can name a member or a thread. Its
-  parameters are never recorded.
-- **The server error message**, by `error.logged`, exactly as XenForo wrote it. XenForo puts the
-  recipient's address in the message when an email fails to send, and other add-ons may put
-  personal data in theirs.
+| group | records |
+|---|---|
+| Email | **each recipient's email address**, and the subject |
+| Moderation | the title of the content acted on, and the reason given for a ban |
+| Failed logins, Spam triggers | the IP address |
+| Admin actions, API requests | the page address, as `route` |
+| Server errors | the error message |
+
+- **The Email group puts your members' email addresses in the log**, one record per email sent.
+  It is the group to think hardest about before turning on.
+- **A title or a ban reason is whatever someone wrote**, so it can name a person.
+- **XenForo puts a name or title in some page addresses** — `users/alice.12/edit` — so a `route`
+  can name a member or a thread. Its parameters are never recorded.
+- **The server error message is exactly as XenForo wrote it.** XenForo puts the recipient's
+  address in the message when an email fails to send, and other add-ons may put personal data in
+  theirs.
 
 ## Installation
 
@@ -81,16 +89,16 @@ alerts should match on `event`, never on the message, which may be reworded.
 
 | group | event | level | fields |
 |---|---|---|---|
-| Moderation | `moderator.action` | info | `moderator_log_id`, `actor_user_id`, `content_type`, `content_id`, `content_user_id`, `discussion_content_type`, `discussion_content_id`, `action` |
-| | `user.banned` | info | `user_id`, `actor_user_id`, `permanent`, `end_date`, `triggered` |
+| Moderation | `moderator.action` | info | `moderator_log_id`, `actor_user_id`, `content_type`, `content_id`, `content_user_id`, `content_title`, `discussion_content_type`, `discussion_content_id`, `action` |
+| | `user.banned` | info | `user_id`, `actor_user_id`, `permanent`, `end_date`, `triggered`, `reason` |
 | | `user.ban_updated` | info | as `user.banned` |
 | | `user.ban_lifted` | info | `user_id`, `expired` |
 | Admin actions | `admin.action` | info | `admin_log_id`, `actor_user_id`, `route` |
 | Spam triggers | `spam.triggered` | info | `content_type`, `content_id`, `user_id`, `result`, `ip` |
 | Failed logins | `login.failed` | info | `user_id`, `ip` |
 | Server errors | `error.logged` | error | `fingerprint`, `error_id`, `last_error_id`, `count`, `exception_type`, `error_message`, `filename`, `line`, `user_id`, `error_date` |
-| Email | `mail.sent` | info | `recipient_count` |
-| | `mail.failed` | warning | `recipient_count` |
+| Email | `mail.sent` | info | `recipient_count`, `recipients`, `subject` |
+| | `mail.failed` | warning | as `mail.sent` |
 | Payment callbacks | `payment.callback` | info | `provider_log_id`, `provider_id`, `log_type`, `transaction_id` |
 | API requests | `api.request` | info | `api_key_id`, `user_id`, `method`, `route`, `status` |
 
@@ -117,6 +125,7 @@ A record, in the JSON format:
         "content_type": "post",
         "content_id": 90211,
         "content_user_id": 12,
+        "content_title": "For sale: two tickets",
         "discussion_content_type": "thread",
         "discussion_content_id": 55,
         "action": "delete_soft"

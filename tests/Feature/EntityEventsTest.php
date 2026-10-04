@@ -46,19 +46,24 @@ class EntityEventsTest extends TestCase
 			'content_type' => 'post',
 			'content_id' => 90211,
 			'content_user_id' => 12,
+			'content_title' => 'A private matter',
 			'discussion_content_type' => 'thread',
 			'discussion_content_id' => 55,
 			'action' => 'delete_soft',
 		], $records[0]['context']);
 	}
 
-	public function test_a_moderator_action_carries_no_title_name_or_reason()
+	/**
+	 * The title is there to read the line by. The action's parameters and the member's name are
+	 * not: one is free text XenForo keeps for itself, the other is what content_user_id is for.
+	 */
+	public function test_a_moderator_action_carries_the_title_and_not_its_parameters()
 	{
 		$this->enableGroup('moderation');
 
 		$this->moderatorLog();
 
-		$this->assertStringNotContainsString('private matter', $this->emitted());
+		$this->assertStringContainsString('A private matter', $this->emitted());
 		$this->assertStringNotContainsString('Alice', $this->emitted());
 		$this->assertStringNotContainsString('rule four', $this->emitted());
 	}
@@ -98,6 +103,7 @@ class EntityEventsTest extends TestCase
 			'permanent' => true,
 			'end_date' => null,
 			'triggered' => false,
+			'reason' => 'spamming the classifieds',
 		], $banned[0]['context']);
 
 		$ban->end_date = 1893456000;
@@ -113,8 +119,6 @@ class EntityEventsTest extends TestCase
 		$lifted = $this->events->event('user.ban_lifted');
 		$this->assertCount(1, $lifted);
 		$this->assertSame(['event' => 'user.ban_lifted', 'user_id' => $user->user_id, 'expired' => false], $lifted[0]['context']);
-
-		$this->assertStringNotContainsString('classifieds', $this->emitted(), 'the reason is not logged');
 	}
 
 	public function test_a_failed_login_emits_the_ip_and_never_what_was_typed()

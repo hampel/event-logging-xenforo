@@ -81,13 +81,13 @@
         "global_cache": false,
         "version_id": 1000011,
         "version_string": "1.0.0a1",
-        "hash": "342c05333805d434141e523c4fa668ab"
+        "hash": "f6b388f4d737dfc4a898509861d4bee7"
     },
     "option_explain.eventLoggingModeration.txt": {
         "global_cache": false,
         "version_id": 1000011,
         "version_string": "1.0.0a1",
-        "hash": "3d1052a76273fa2c80abd3f0c6f402aa"
+        "hash": "5eba221fb69d2df44d917b684eb1f870"
     },
     "option_explain.eventLoggingPayments.txt": {
         "global_cache": false,

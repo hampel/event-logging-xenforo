@@ -9,6 +9,17 @@ class ErrorLogMirrorTest extends TestCase
 {
 	use UsesDatabaseTransactions;
 
+	/**
+	 * Every test starts with no position, whatever the install holds: on a forum with the errors
+	 * group on, the cron entry has already recorded one. The transaction puts it back.
+	 */
+	protected function setUp(): void
+	{
+		parent::setUp();
+
+		$this->app()->simpleCache()->deleteValue('Hampel/EventLogging', ErrorLogMirror::CACHE_KEY);
+	}
+
 	private function mirror(): ErrorLogMirror
 	{
 		return new ErrorLogMirror($this->app());

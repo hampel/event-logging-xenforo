@@ -8,8 +8,9 @@ use XF\Mvc\Entity\Entity;
  * spam trigger log are raw inserts and are caught by class extensions instead; the server error
  * log has neither and is read on a cron.
  *
- * Each record carries identifiers and nothing else - no titles, reasons, usernames or submitted
- * data. Whoever needs the rest follows the id into the forum.
+ * Each record carries identifiers, plus the few things an administrator needs to read a line
+ * without opening the forum: the content's title and a ban's reason. Never the content itself,
+ * nor anything a member submitted.
  */
 class Listener
 {
@@ -26,6 +27,8 @@ class Listener
 			'content_type' => $entity->content_type,
 			'content_id' => (int) $entity->content_id,
 			'content_user_id' => (int) $entity->content_user_id,
+			// as stored: the entity's getter censors it for display
+			'content_title' => (string) $entity->getValue('content_title'),
 			'discussion_content_type' => $entity->discussion_content_type,
 			'discussion_content_id' => (int) $entity->discussion_content_id,
 			'action' => $entity->action,
@@ -75,6 +78,7 @@ class Listener
 				'permanent' => $endDate === 0,
 				'end_date' => $endDate ? gmdate('c', $endDate) : null,
 				'triggered' => (bool) $entity->triggered,
+				'reason' => (string) $entity->user_reason,
 			]
 		);
 	}

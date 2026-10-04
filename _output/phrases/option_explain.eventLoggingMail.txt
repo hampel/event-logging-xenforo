@@ -1,1 +1,1 @@
-Records each email XenForo hands to its mail transport, and whether it was accepted. A record holds the number of recipients - never an address, the subject or the body.
+Records each email XenForo hands to its mail transport, and whether it was accepted. A record holds each recipient's email address and the subject - never the body.

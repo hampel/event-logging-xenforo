@@ -52,22 +52,27 @@ costs one option read and no queries.
 
 ## What a record may hold
 
-**Identifiers, never rows.** A user ID, a content type and ID, an action. Never a title, a
-username, a reason, a message body, a submitted form, a token or a payment's details — the README's
-*Privacy* section is the list, and it is a promise to forum owners. The reason it matters more
-here than in a local log: shipped records are readable by whoever can query the log store.
+**Identifiers, plus what an administrator needs to read the line — never content, and never a
+secret.** Simon's decision, 2026-10-04: the readers are administrators, who can see most of this
+on the forum anyway, and a log that says only "user 12, post 90211" sends them there for every
+line. So a record may hold a content title, a ban reason, an email's recipients and subject.
 
-**An IP address or other personal data only on an event that is about it** — `login.failed` and
-`spam.triggered` carry an IP; nothing else does. `route` on `admin.action` and `api.request` is
-the one place a name can appear, because XenForo puts slugs in its addresses. A new event that
-carries personal data must be added to the README's *Privacy* section in the same commit.
+**What still never appears, at any level:** a message body — post, conversation or email — a
+submitted form, a password, token, key or session ID, what was typed into a failed login, and a
+payment's details. An email body is where the reset and confirmation links are; a link that acts
+as a credential is the line.
+
+**Every field that can hold personal data is listed in the README's *Privacy* table**, by group.
+This is a published add-on, so that table is what a forum owner reads before turning a group on;
+a new such field is added there, and to the option's explanation, in the same commit.
 
 **The traps, each with a test that fails if it is walked into:**
 
 - the admin log's `request_data` is the submitted form, which on a user edit includes a password;
 - the login attempt's `login` is what was typed, which is sometimes a password;
 - the error log's `request_state` holds the request's whole `_GET` and `_POST`;
-- the spam trigger log's `details` and the payment log's `log_details` hold submitted content.
+- the spam trigger log's `details` and the payment log's `log_details` hold submitted content;
+- an email's body holds password-reset and confirmation links.
 
 **The message is a fixed string and `event` is a fixed name**, `noun.verb`, lowercase. Everything
 that varies goes in the context, in `snake_case`. An event name is the public API: once released
