@@ -115,6 +115,8 @@ class MonologAbsentTest extends TestCase
 		$this->assertSame(1, $code);
 		$this->assertMatchesRegularExpression('/\[fail\] Monolog add-on +not installed, disabled, or older than/', $output);
 		$this->assertMatchesRegularExpression('/\[    \] probe record +no logger to write to/', $output);
+		$this->assertMatchesRegularExpression('/\[    \] level +the Monolog add-on is not available/', $output);
+		$this->assertMatchesRegularExpression('/\[    \] format +the Monolog add-on is not available/', $output);
 		$this->assertStringContainsString('Validation failed', $output);
 	}
 

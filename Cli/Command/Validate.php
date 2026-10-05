@@ -108,6 +108,14 @@ class Validate extends Command
 	 */
 	private function logFile(): void
 	{
+		if (Emitter::logger() instanceof NullLogger)
+		{
+			// a disabled add-on's options are still readable, and describe a file nothing writes to
+			$this->checkSkip('level', 'the Monolog add-on is not available');
+			$this->checkSkip('format', 'the Monolog add-on is not available');
+			return;
+		}
+
 		$level = MonologSettings::fileLevel();
 		if ($level === null)
 		{
