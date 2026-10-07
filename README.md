@@ -15,7 +15,7 @@ By [Simon Hampel](https://xenforo.com/community/members/sim.4264/).
 
 - XenForo 2.2 or later
 - PHP 7.4 or later
-- Monolog Logging Service 5.0.1 or later
+- [Monolog Logging Service](https://xenforo.com/community/resources/monolog-logging-service.6080/) 5.0.1 or later
 
 ## Privacy
 
