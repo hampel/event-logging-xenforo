@@ -1,5 +1,6 @@
 <?php namespace Hampel\EventLogging\Cli;
 
+use Hampel\EventLogging\Emitter;
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -7,6 +8,8 @@ use Symfony\Component\Console\Output\OutputInterface;
  * Settings rows and check rows, in the layout the Monolog Logging Service add-on's own commands
  * use. The four check outcomes: `[ ok ]` was proved, `[warn]` works now and bites later, `[fail]`
  * cannot do what it is configured to, and a blank marker did not apply. A skip is never a pass.
+ *
+ * For a Symfony Command: probe() names the command in what it logs.
  */
 trait RendersReport
 {
@@ -84,6 +87,30 @@ trait RendersReport
 	protected function checkSkip(string $label, string $detail = ''): void
 	{
 		$this->check('[    ]', $label, $detail);
+	}
+
+	/**
+	 * Runs one check, and turns anything it throws into a failed row.
+	 *
+	 * No check may end the run: a validation that stops at its first problem hides the rest, on the
+	 * one occasion the whole list was wanted. The exception goes to the server error log as well,
+	 * since the row has room for its first line only.
+	 *
+	 * @return mixed what the check returned, or null if it threw
+	 */
+	protected function probe(string $label, callable $probe)
+	{
+		try
+		{
+			return $probe();
+		}
+		catch (\Throwable $e)
+		{
+			\XF::logException($e, false, Emitter::ERROR_PREFIX . ' ' . $this->getName() . " - {$label}: ");
+			$this->checkFail($label, get_class($e) . ': ' . strtok($e->getMessage(), "\n"));
+
+			return null;
+		}
 	}
 
 	private function check(string $marker, string $label, string $detail): void

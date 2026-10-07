@@ -229,19 +229,4 @@ class Validate extends Command
 			? $this->checkOk('log file', "the probe arrived in {$path}")
 			: $this->checkFail('log file', "the probe did not arrive in {$path}");
 	}
-
-	/**
-	 * No check may end the run: a validation that stops at its first problem hides the rest.
-	 */
-	private function probe(string $label, callable $probe): void
-	{
-		try
-		{
-			$probe();
-		}
-		catch (\Throwable $e)
-		{
-			$this->checkFail($label, get_class($e) . ': ' . strtok($e->getMessage(), "\n"));
-		}
-	}
 }

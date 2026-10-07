@@ -178,6 +178,13 @@ through `Emitter::setLogger()`), so nothing reaches a real log file, and turns e
 before each test. One test in `EmitterTest` goes through the real Monolog add-on to a temporary
 file. Tests that write rows use the framework's `UsesDatabaseTransactions`.
 
+**`Cli/RendersReport.php` is a copy of `Hampel/Monolog`'s trait, kept in step by hand.** It is
+duplicated because the shared package it mirrors needs PHP 8.3 and a polyfill XenForo does not
+ship. Do not copy it into a third add-on; that is the point at which it becomes a package.
+`probe()` lives in the trait here — it runs one check, turns anything thrown into a failed row,
+and logs the exception with this add-on's `EventLogging:` prefix, which the error log mirror
+skips.
+
 **The commands follow the `Hampel/Monolog` pair**: config reads and prints, validate exercises the
 real thing, four outcomes, exit 1 only on a failure, `--unattended` skips only the write. Two
 traps carried over from there, both fatal for every command in `cmd.php`: extend Symfony's
