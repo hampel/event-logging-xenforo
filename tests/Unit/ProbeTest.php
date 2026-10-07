@@ -32,13 +32,18 @@ class ProbeTest extends TestCase
 				parent::__construct('probe-test:validate');
 			}
 
+			protected function errorLogPrefix(): string
+			{
+				return 'ProbeTest: ';
+			}
+
 			protected function execute(InputInterface $input, OutputInterface $output)
 			{
 				$this->report = $output;
 				$this->returned = $this->probe('first check', $this->check);
 				$this->checkOk('second check', 'still ran');
 
-				return $this->failed ? 1 : 0;
+				return $this->exitCode();
 			}
 		};
 
@@ -82,6 +87,19 @@ class ProbeTest extends TestCase
 		$this->runProbe(function () { throw new \RuntimeException('cannot connect'); });
 
 		$this->assertExceptionLoggedTimes(\RuntimeException::class, 1);
+	}
+
+	/**
+	 * The row is prefixed so the error log mirror passes over it, and names the command and check.
+	 */
+	public function test_what_is_logged_carries_the_prefix_the_command_and_the_check()
+	{
+		$this->fakesErrors();
+
+		$this->runProbe(function () { throw new \RuntimeException('cannot connect'); });
+
+		$logged = array_column($this->getExceptions(), 'message');
+		$this->assertSame(['ProbeTest: probe-test:validate - first check: cannot connect'], $logged);
 	}
 
 	public function test_an_error_is_caught_as_well_as_an_exception()

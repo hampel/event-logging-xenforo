@@ -71,7 +71,8 @@ event through XenForo's own write path and covers:
   provider's data appear in no record;
 - the error log mirror's position, collapsing, fingerprint and skipping, and that Monolog emails a
   different error and skips a repeat;
-- both commands;
+- both commands, and the exit code for every mix of warning and failure with and without
+  `--strict`;
 - one record through the real Monolog add-on to a JSON file.
 
 The suite needs PHP 8.3 and has only run on XenForo 2.3. It cannot prove the add-on's floor.
@@ -87,7 +88,7 @@ development mode off** — not by the suite. Before a release, on a fresh XenFor
 3. Install Monolog Logging Service, then this add-on. The output must say `Importing add-on data`
    and not `All data imported`, and no `_output/` directory may appear in the installed copy.
 4. Put the README's `config.php` block in place and run `event-logging:validate`. Every check
-   passes, and the event groups row says none is on.
+   passes or is skipped, except the event groups row, which warns that none is on.
 5. With every group still off, post a wrong password to the login form. No log file is created.
 6. Turn every group on, then produce each event once, through XenForo's own code:
    - a member's thread, soft-deleted by a moderator with a reason, through the thread deleter

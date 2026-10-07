@@ -118,6 +118,8 @@ class MonologAbsentTest extends TestCase
 		$this->assertMatchesRegularExpression('/\[    \] level +the Monolog add-on is not available/', $output);
 		$this->assertMatchesRegularExpression('/\[    \] format +the Monolog add-on is not available/', $output);
 		$this->assertStringContainsString('Validation failed', $output);
+
+		$this->assertSame(1, (new CommandTester(new Validate()))->execute(['--strict' => true]), 'a failure is 1 under --strict too');
 	}
 
 	/**

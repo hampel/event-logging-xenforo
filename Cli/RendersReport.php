@@ -1,6 +1,5 @@
 <?php namespace Hampel\EventLogging\Cli;
 
-use Hampel\EventLogging\Emitter;
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -24,6 +23,14 @@ trait RendersReport
 
 	/** @var string|null the colour muted() uses, once known */
 	private static ?string $mutedColour = null;
+
+	/**
+	 * What every row this command writes to XenForo's server error log begins with - the add-on's
+	 * own prefix, so the error log mirror can skip its rows. Abstract, not a property with a
+	 * default: a command that forgot it would log rows the mirror sends at error, and nothing would
+	 * say so. This way it does not load.
+	 */
+	abstract protected function errorLogPrefix(): string;
 
 	protected function heading(string $title): void
 	{
@@ -90,13 +97,28 @@ trait RendersReport
 	}
 
 	/**
-	 * Runs one check, and turns anything it throws into a failed row.
+	 * The exit code for the checks reported so far: 1 if any failed, otherwise 0 - a warning is not
+	 * a failure, so `command && next-step` carries on past one.
 	 *
-	 * No check may end the run: a validation that stops at its first problem hides the rest, on the
-	 * one occasion the whole list was wanted. The exception goes to the server error log as well,
-	 * since the row has room for its first line only.
+	 * $strict makes a warning exit 2, for a caller that wants to hear of one. 1 still means failed.
+	 * This is NOT the monitoring-plugin numbering, where 1 is a warning and 2 is critical.
+	 */
+	protected function exitCode(bool $strict = false): int
+	{
+		if ($this->failed)
+		{
+			return 1;
+		}
+
+		return $strict && $this->warned ? 2 : 0;
+	}
+
+	/**
+	 * Runs one check, and turns anything it throws into a `[fail]` row and a server error log
+	 * entry. No check may end the run: a validation that stops at its first problem hides the rest,
+	 * on the one occasion the whole list was wanted.
 	 *
-	 * @return mixed what the check returned, or null if it threw
+	 * @return mixed|null what the probe returned, or null if it threw
 	 */
 	protected function probe(string $label, callable $probe)
 	{
@@ -106,7 +128,7 @@ trait RendersReport
 		}
 		catch (\Throwable $e)
 		{
-			\XF::logException($e, false, Emitter::ERROR_PREFIX . ' ' . $this->getName() . " - {$label}: ");
+			\XF::logException($e, false, "{$this->errorLogPrefix()}{$this->getName()} - {$label}: ");
 			$this->checkFail($label, get_class($e) . ': ' . strtok($e->getMessage(), "\n"));
 
 			return null;

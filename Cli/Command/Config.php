@@ -25,6 +25,11 @@ class Config extends Command
 			->setDescription('Show which events this forum sends to its logs');
 	}
 
+	protected function errorLogPrefix(): string
+	{
+		return Emitter::ERROR_PREFIX . ' ';
+	}
+
 	protected function execute(InputInterface $input, OutputInterface $output)
 	{
 		$this->report = $output;

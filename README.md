@@ -174,15 +174,30 @@ arrive this way.
 Two commands, run from the XenForo root:
 
 ```bash
-php cmd.php event-logging:config                  # which groups are on, and the log file's level
-php cmd.php event-logging:validate                # whether an event can reach the log
-php cmd.php event-logging:validate --unattended   # the same, without writing a probe record
+php cmd.php event-logging:config                          # which groups are on, and the log file's level
+php cmd.php event-logging:validate                        # whether an event can reach the log
+php cmd.php event-logging:validate --unattended           # the same, without writing a probe record
+php cmd.php event-logging:validate --unattended --strict  # for a monitor: a warning exits 2
 ```
 
 **`event-logging:validate` writes one record**, marked `"probe": true` with the event
-`eventlogging.validate`, and looks for it in the log file. It warns if the log file does not take
-Info from the `events` channel, or is not in the JSON format. It exits 1 if a check failed and 0
-otherwise, warnings included.
+`eventlogging.validate`, and looks for it in the log file. It warns if no event group is on, if
+the log file does not take Info from the `events` channel, or if it is not in the JSON format.
+
+**It exits 1 if a check failed and 0 otherwise — warnings included** — so a deploy step can depend
+on it. `--strict` makes a warning exit 2, for a monitor that should hear of one:
+
+| | all fine | warnings only | any failure |
+|---|---|---|---|
+| `event-logging:validate` | 0 | 0 | 1 |
+| `event-logging:validate --strict` | 0 | 2 | 1 |
+
+- **1 always means a check failed.** This is not the monitoring-plugin numbering, where 1 is a
+  warning and 2 is critical.
+- **`--strict` changes only the exit code.** Pair it with `--unattended` for anything that runs on
+  a schedule, or leave `--unattended` off to have each run prove a record arrives, at one probe
+  record per run.
+- **A fresh install validates with a warning**, because every group is off until you turn one on.
 
 ## Licence
 

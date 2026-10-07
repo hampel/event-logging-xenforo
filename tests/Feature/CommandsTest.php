@@ -39,7 +39,8 @@ class CommandsTest extends TestCase
 
 		$this->assertSame(0, $code);
 		$this->assertMatchesRegularExpression('/\[    \] probe record +skipped - --unattended/', $output);
-		$this->assertMatchesRegularExpression('/\[    \] event groups +none is on/', $output);
+		$this->assertMatchesRegularExpression('/\[warn\] event groups +none is on/', $output);
+		$this->assertStringContainsString('Validated, with warnings', $output);
 		$this->assertSame([], $this->events->records);
 	}
 
@@ -76,6 +77,44 @@ class CommandsTest extends TestCase
 		$this->assertSame(0, $code);
 		$this->assertMatchesRegularExpression('/\[ ok \] level +Info, for the events channel alone/', $output);
 		$this->assertMatchesRegularExpression('/\[ ok \] format +json/', $output);
+	}
+
+	/**
+	 * An event logger with every group off logs nothing: it works, and it is not doing its job.
+	 * Without --strict that is still exit 0, which is this add-on's state straight after install.
+	 */
+	public function test_no_group_on_is_a_warning_that_only_strict_turns_into_an_exit_code()
+	{
+		$this->setConfig('monolog', ['file' => ['format' => 'json']]);
+
+		[$code] = $this->runCommand(new Validate(), ['--unattended' => true]);
+		$this->assertSame(0, $code);
+
+		[$code, $output] = $this->runCommand(new Validate(), ['--unattended' => true, '--strict' => true]);
+		$this->assertSame(2, $code);
+		$this->assertMatchesRegularExpression('/\[warn\] event groups/', $output);
+	}
+
+	public function test_strict_exits_0_when_nothing_warns()
+	{
+		$this->setConfig('monolog', ['file' => ['format' => 'json']]);
+		$this->enableGroup('spam');
+
+		[$code, $output] = $this->runCommand(new Validate(), ['--unattended' => true, '--strict' => true]);
+
+		$this->assertSame(0, $code, $output);
+		$this->assertStringNotContainsString('[warn]', $output);
+	}
+
+	/**
+	 * --strict changes the exit code and nothing else: the probe still runs unless --unattended
+	 * says otherwise.
+	 */
+	public function test_strict_does_not_skip_the_probe()
+	{
+		$this->runCommand(new Validate(), ['--strict' => true]);
+
+		$this->assertCount(1, $this->events->event('eventlogging.validate'));
 	}
 
 	private function runCommand($command, array $input = []): array

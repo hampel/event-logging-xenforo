@@ -179,13 +179,18 @@ file. Tests that write rows use the framework's `UsesDatabaseTransactions`.
 
 **`Cli/RendersReport.php` is a copy of `Hampel/Monolog`'s trait, kept in step by hand.** It is
 duplicated because the shared package it mirrors needs PHP 8.3 and a polyfill XenForo does not
-ship. Do not copy it into a third add-on; that is the point at which it becomes a package.
-`probe()` lives in the trait here — it runs one check, turns anything thrown into a failed row,
-and logs the exception with this add-on's `EventLogging:` prefix, which the error log mirror
-skips.
+ship. Do not copy it into a third add-on; that is the point at which it becomes a package. It
+holds the rendering, `exitCode()`, `probe()` and an abstract `errorLogPrefix()`, and nothing
+specific to this add-on: the two copies differ in namespace and comments only. Each command
+returns `EventLogging: ` as its prefix, which is what makes the error log mirror skip what
+`probe()` logs.
 
 **The commands follow the `Hampel/Monolog` pair**: config reads and prints, validate exercises the
-real thing, four outcomes, exit 1 only on a failure, `--unattended` skips only the write. Two
+real thing, four outcomes, exit 1 only on a failure, `--unattended` skips only the write.
+`--strict` makes a warning exit 2 and changes nothing else — Simon's decision of 2026-10-07 for
+every `<addon>:validate`. So a row a monitor should hear about is a `[warn]` row always, never a
+skip the flag promotes: "no event group is on" is one, which means a fresh install validates
+with a warning. Two
 traps carried over from there, both fatal for every command in `cmd.php`: extend Symfony's
 `Command` directly and return `0` or `1`, because `xf-make:cli-command` scaffolds a parent class
 XenForo 2.2 does not have; and never name a helper `run()`.

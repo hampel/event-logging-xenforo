@@ -19,6 +19,8 @@ use Symfony\Component\Console\Output\OutputInterface;
  * still run.
  *
  * Exit code: 1 if any check failed, 0 otherwise - a warning does not fail, so a gate can rely on it.
+ * --strict makes a warning exit 2, for a monitor that wants to hear of one; it changes nothing
+ * else, and 1 still means failed.
  */
 class Validate extends Command
 {
@@ -30,7 +32,14 @@ class Validate extends Command
 			->setName('event-logging:validate')
 			->setDescription('Check that events can reach the log')
 			->addOption('unattended', null, InputOption::VALUE_NONE,
-				'Skip the probe, which writes a record - for a gate nobody is watching');
+				'Skip the probe, which writes a record - for a gate nobody is watching')
+			->addOption('strict', null, InputOption::VALUE_NONE,
+				'Exit 2 when there are warnings and no failure - for a monitor that should hear of one');
+	}
+
+	protected function errorLogPrefix(): string
+	{
+		return Emitter::ERROR_PREFIX . ' ';
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output)
@@ -78,11 +87,13 @@ class Validate extends Command
 		if ($this->failed)
 		{
 			$this->report->writeln('<error>Validation failed - events are not reaching the log as configured</error>');
-			return 1;
+		}
+		else
+		{
+			$this->report->writeln($this->warned ? '<comment>Validated, with warnings</comment>' : '<info>Validated</info>');
 		}
 
-		$this->report->writeln($this->warned ? '<comment>Validated, with warnings</comment>' : '<info>Validated</info>');
-		return 0;
+		return $this->exitCode((bool) $input->getOption('strict'));
 	}
 
 	private function monolog(): void
@@ -98,7 +109,7 @@ class Validate extends Command
 
 		$on
 			? $this->checkOk('event groups', count($on) . ' of ' . count(Emitter::GROUPS) . ' on: ' . implode(', ', $on))
-			: $this->checkSkip('event groups', 'none is on - nothing is emitted until one is, under Options > Monolog');
+			: $this->checkWarn('event groups', 'none is on - nothing is emitted until one is, under Options > Monolog');
 	}
 
 	/**
