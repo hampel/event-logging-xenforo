@@ -43,7 +43,7 @@ class ProbeTest extends TestCase
 				$this->returned = $this->probe('first check', $this->check);
 				$this->checkOk('second check', 'still ran');
 
-				return $this->exitCode();
+				return $this->checkExitCode();
 			}
 		};
 

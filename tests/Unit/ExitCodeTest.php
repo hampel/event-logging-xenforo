@@ -66,7 +66,7 @@ class ExitCodeTest extends TestCase
 					$row === 'warn' ? $this->checkWarn('row') : ($row === 'fail' ? $this->checkFail('row') : $this->checkSkip('row'));
 				}
 
-				return $this->exitCode((bool) $input->getOption('strict'));
+				return $this->checkExitCode((bool) $input->getOption('strict'));
 			}
 		};
 

@@ -180,8 +180,9 @@ file. Tests that write rows use the framework's `UsesDatabaseTransactions`.
 **`Cli/RendersReport.php` is a copy of `Hampel/Monolog`'s trait, kept in step by hand.** It is
 duplicated because the shared package it mirrors needs PHP 8.3 and a polyfill XenForo does not
 ship. Do not copy it into a third add-on; that is the point at which it becomes a package. It
-holds the rendering, `exitCode()`, `probe()` and an abstract `errorLogPrefix()`, and nothing
-specific to this add-on: the two copies differ in namespace and comments only. Each command
+holds the rendering, `checkExitCode()`, `probe()` and an abstract `errorLogPrefix()`, under the
+names `hampel/console-report` uses wherever it has one, and nothing specific to this add-on: the
+two copies differ in the namespace and one comment. Each command
 returns `EventLogging: ` as its prefix, which is what makes the error log mirror skip what
 `probe()` logs.
 

@@ -46,31 +46,31 @@ class Validate extends Command
 	{
 		$this->report = $output;
 
-		$this->heading('Monolog');
+		$this->checkSection('Monolog');
 		$this->probe('Monolog add-on', function ()
 		{
 			$this->monolog();
 		});
 
-		$this->heading('Event groups');
+		$this->checkSection('Event groups');
 		$this->probe('event groups', function ()
 		{
 			$this->groups();
 		});
 
-		$this->heading('Log file');
+		$this->checkSection('Log file');
 		$this->probe('log file', function ()
 		{
 			$this->logFile();
 		});
 
-		$this->heading('Server error log');
+		$this->checkSection('Server error log');
 		$this->probe('error log mirror', function ()
 		{
 			$this->errorLog();
 		});
 
-		$this->heading('Probe');
+		$this->checkSection('Probe');
 		if ($input->getOption('unattended'))
 		{
 			$this->checkSkip('probe record', 'skipped - --unattended');
@@ -84,16 +84,16 @@ class Validate extends Command
 		}
 
 		$this->report->writeln('');
-		if ($this->failed)
+		if ($this->checksFailed())
 		{
 			$this->report->writeln('<error>Validation failed - events are not reaching the log as configured</error>');
 		}
 		else
 		{
-			$this->report->writeln($this->warned ? '<comment>Validated, with warnings</comment>' : '<info>Validated</info>');
+			$this->report->writeln($this->checksWarned() ? '<comment>Validated, with warnings</comment>' : '<info>Validated</info>');
 		}
 
-		return $this->exitCode((bool) $input->getOption('strict'));
+		return $this->checkExitCode((bool) $input->getOption('strict'));
 	}
 
 	private function monolog(): void
