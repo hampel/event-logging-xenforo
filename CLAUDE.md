@@ -23,12 +23,11 @@ do not grow this add-on into them.
 depend on, and installing a logging library must not start recording member activity. This one
 says what it does on the label.
 
-**`addon.json` requires `Hampel/Monolog` 5.0.1**: 5.0.0 for `channel()`, JSON output and a level
-per channel, and 5.0.1 for deduplication by `fingerprint` and a single `Monolog:` prefix on
-every error it logs. Its contract is the PSR-3 logger `channel()` returns and nothing else. `MonologSettings`
+**`addon.json` requires `Hampel/Monolog` 5.0.1**: 5.0.0 for `channel()`, JSON output and a level per
+channel, and 5.0.1 for deduplication by `fingerprint` and a single `Monolog:` prefix on every error
+it logs. Its contract is the PSR-3 logger `channel()` returns and nothing else. `MonologSettings`
 reads that add-on's own classes to report the log file's level and format, which is outside the
-contract — so each read is guarded, only the two commands use it, and emitting an event never
-does.
+contract — so each read is guarded, only the two commands use it, and emitting an event never does.
 
 ## Every event goes through `Emitter::emit()`
 
