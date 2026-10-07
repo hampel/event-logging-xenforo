@@ -27,13 +27,16 @@ class AdminLog extends XFCP_AdminLog
 	}
 
 	/**
-	 * The admin route from a request URI - `users/1/save` from `/admin.php?users/1/save&x=y` -
-	 * without the parameters that follow it.
+	 * The admin route, without any parameters that follow it.
+	 *
+	 * XenForo's admin controller passes the request's route path - `users/1/save` - and not a URI,
+	 * whatever the parameter is called. A URI is accepted too, since anything can call the
+	 * repository: `/admin.php?users/1/save&x=y` gives the same route.
 	 */
 	public static function route(string $url): string
 	{
-		$query = strpos($url, '?') === false ? '' : substr($url, strpos($url, '?') + 1);
-		$route = strtok($query, '&');
+		$path = strpos($url, '?') === false ? $url : substr($url, strpos($url, '?') + 1);
+		$route = strtok(ltrim($path, '/'), '&');
 
 		if ($route === false || strpos($route, '=') !== false)
 		{

@@ -35,6 +35,10 @@ needs a person.
 - **A listener on an entity nothing saves never fires.** XenForo writes the admin log, the spam
   trigger log and the error log with raw inserts. Each source is tested through XenForo's own
   write for this reason, not by calling the listener.
+- **A test that calls a core method directly chooses the shape of its arguments.** XenForo passes
+  `logAdminRequest()` a route path, not a URI; tests that passed a URI were green while every live
+  `admin.action` had no route. Where XenForo is the only real caller, one test must go through
+  it — `dispatch()` for a controller.
 - **`Mailer::send()` differs between XenForo 2.2 and 2.3.** The extension's untyped signature is
   compatible with both, and the suite proves only 2.3.
 - **The admin log extension is registered under its XenForo 2.2 class name.** 2.3 resolves it
@@ -89,7 +93,8 @@ development mode off** — not by the suite. Before a release, on a fresh XenFor
    - a member's thread, soft-deleted by a moderator with a reason, through the thread deleter
      service;
    - a ban with a reason, applied through the banning repository, then changed, then deleted;
-   - `logAdminRequest()` with a route followed by parameters, and a form value;
+   - `logAdminRequest()` with a route path, as XenForo's admin controller passes it, and a form
+     value — or better, a real POST to the admin control panel;
    - `logSpamTrigger()` on a user checker and a content checker after a `moderated` decision;
    - an email to one recipient, one to two, and one through a transport nothing listens on;
    - `logCallback()` on the payment repository, once as a payment and once as an error;

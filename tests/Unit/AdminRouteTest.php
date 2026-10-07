@@ -16,7 +16,18 @@ class AdminRouteTest extends TestCase
 		$this->app()->extendClass('XF\Repository\AdminLog');
 	}
 
-	public function test_the_route_is_the_first_part_of_the_query_string()
+	/**
+	 * What XenForo's admin controller actually passes: Request::getRoutePath(), with no script
+	 * name and no question mark.
+	 */
+	public function test_a_route_path_is_the_route()
+	{
+		$this->assertSame('login/keep-alive', AdminLog::route('login/keep-alive'));
+		$this->assertSame('users/alice.12/save', AdminLog::route('users/alice.12/save'));
+		$this->assertSame('options/update', AdminLog::route('/options/update'));
+	}
+
+	public function test_a_uri_gives_the_route_after_its_question_mark()
 	{
 		$this->assertSame('users/1/save', AdminLog::route('/admin.php?users/1/save'));
 		$this->assertSame('users/1/save', AdminLog::route('/forum/admin.php?users/1/save'));
@@ -29,7 +40,7 @@ class AdminRouteTest extends TestCase
 
 	public function test_a_request_with_no_route_has_an_empty_one()
 	{
-		$this->assertSame('', AdminLog::route('/admin.php'));
+		$this->assertSame('', AdminLog::route(''));
 		$this->assertSame('', AdminLog::route('/admin.php?'));
 		$this->assertSame('', AdminLog::route('/admin.php?a=b'), 'a parameter is not a route');
 	}

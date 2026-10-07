@@ -46,6 +46,25 @@ class ExtensionEventsTest extends TestCase
 		$this->assertStringNotContainsString('203.0.113.9', $this->emitted());
 	}
 
+	/**
+	 * Through XenForo's own admin controller, which is the only caller that matters: it passes
+	 * the request's route path, not a URI. Every other test here calls the repository directly
+	 * and so chooses that argument's shape for itself - which is how a route() that only
+	 * understood URIs passed them all and logged no route on a live forum.
+	 */
+	public function test_an_admin_request_dispatched_by_xenforo_carries_its_route()
+	{
+		$this->enableGroup('admin');
+		$this->actingAsMember(['user_id' => 1, 'is_admin' => true]);
+
+		$this->dispatch('login/keep-alive', 'admin', [], [], 'POST');
+
+		$records = $this->events->event('admin.action');
+		$this->assertCount(1, $records);
+		$this->assertSame('login/keep-alive', $records[0]['context']['route']);
+		$this->assertSame(1, $records[0]['context']['actor_user_id']);
+	}
+
 	public function test_an_admin_request_xenforo_does_not_log_emits_nothing()
 	{
 		$this->enableGroup('admin');
