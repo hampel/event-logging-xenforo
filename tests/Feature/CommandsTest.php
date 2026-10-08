@@ -11,14 +11,11 @@ class CommandsTest extends TestCase
 	 * XenForo loads every add-on's command classes to list them, so one that cannot load takes down
 	 * every command in cmd.php, not only its own.
 	 */
-	public function test_both_commands_are_valid_xenforo_commands()
+	public function test_every_console_command_loads()
 	{
-		$runner = new \XF\Cli\Runner();
-		$isValid = new \ReflectionMethod($runner, 'isValidCommandClass');
-		$isValid->setAccessible(true);
+		$classes = $this->assertConsoleCommandsLoad('Hampel/EventLogging');
 
-		$this->assertTrue($isValid->invoke($runner, Config::class));
-		$this->assertTrue($isValid->invoke($runner, Validate::class));
+		$this->assertEqualsCanonicalizing([Config::class, Validate::class], $classes, 'the walk found both commands, and only them');
 	}
 
 	public function test_config_shows_each_group_and_emits_nothing()
