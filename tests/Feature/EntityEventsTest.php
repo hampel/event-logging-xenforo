@@ -12,6 +12,20 @@ class EntityEventsTest extends TestCase
 {
 	use UsesDatabaseTransactions;
 
+	/**
+	 * An ordinary member - not staff, which XenForo refuses to ban - seen by this connection only,
+	 * and rolled back with the test.
+	 */
+	private function createMember(): \XF\Entity\User
+	{
+		return $this->createEntity('XF:User', [
+			'username' => 'EventLogging ' . bin2hex(random_bytes(4)),
+			'email' => 'eventlogging-' . bin2hex(random_bytes(4)) . '@example.com',
+			'user_group_id' => \XF\Entity\User::GROUP_REG,
+			'user_state' => 'valid',
+		]);
+	}
+
 	private function moderatorLog(): \XF\Entity\ModeratorLog
 	{
 		return $this->createEntity('XF:ModeratorLog', [
@@ -77,14 +91,10 @@ class EntityEventsTest extends TestCase
 
 	public function test_a_ban_emits_banned_then_updated_then_lifted()
 	{
-		// XenForo refuses to ban a member who does not exist, or who is staff
-		$user = $this->app()->finder('XF:User')
-			->where(['is_admin' => 0, 'is_moderator' => 0, 'is_banned' => 0, 'user_state' => 'valid'])
-			->fetchOne();
-		if (!$user)
-		{
-			$this->markTestSkipped('This install has no ordinary member to ban.');
-		}
+		// a member of this test's own, inside its transaction: banning one sets is_banned on the
+		// user's row, and a member borrowed from the database is a row another process can be
+		// holding - a second suite, or the forum's own cron
+		$user = $this->createMember();
 		$this->enableGroup('moderation');
 
 		$ban = $this->createEntity('XF:UserBan', [
