@@ -150,8 +150,7 @@ class EntityEventsTest extends TestCase
 	public function test_a_failed_login_names_the_member_whose_account_was_tried()
 	{
 		$this->enableGroup('auth');
-		$user = $this->app()->finder('XF:User')->order('user_id')->fetchOne();
-		$this->assertNotNull($user, 'the install has a member');
+		$user = $this->createMember();
 
 		$this->app()->repository('XF:LoginAttempt')->logFailedLogin($user->username, '2001:db8::1');
 
