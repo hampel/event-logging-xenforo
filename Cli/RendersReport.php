@@ -18,8 +18,9 @@ use Symfony\Component\Console\Output\OutputInterface;
  * its siblings, checkResult(), checksFailed(), checksWarned(), checkExitCode(), detail(),
  * heading(), and the $check... properties - so a command written against this reads the same as
  * one written against the package, and moving to it would be a change of `use`. Keep it that way:
- * add to the package's vocabulary, do not rename it. Three things are not in the package: muted(),
- * probe() and errorLogPrefix(), which are XenForo's concerns; and checkExitCode()'s $strict.
+ * add to the package's vocabulary, do not rename it. Three things are not in the package, being
+ * XenForo's concerns: muted(), probe() and errorLogPrefix(). The package declined probe(): it has
+ * no logger to report what was thrown, which is what earns the method its place here.
  *
  * For a Symfony `Command`: probe() names the command in what it logs.
  */
@@ -67,7 +68,7 @@ trait RendersReport
 	 * Text in grey, where the console has grey. XenForo 2.2 ships its own fork of symfony/console,
 	 * which knows only the eight basic colours and throws on `gray` - taking the command down at its
 	 * first annotation - so there it is the terminal's default colour instead. Never write a grey
-	 * foreground tag directly.
+	 * foreground tag directly; CommandsTest fails if anything does.
 	 */
 	protected function muted(string $text): string
 	{

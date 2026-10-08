@@ -177,14 +177,16 @@ through `Emitter::setLogger()`), so nothing reaches a real log file, and turns e
 before each test. One test in `EmitterTest` goes through the real Monolog add-on to a temporary
 file. Tests that write rows use the framework's `UsesDatabaseTransactions`.
 
-**`Cli/RendersReport.php` is a copy of `Hampel/Monolog`'s trait, kept in step by hand.** It is
-duplicated because the shared package it mirrors needs PHP 8.3 and a polyfill XenForo does not
-ship. Do not copy it into a third add-on; that is the point at which it becomes a package. It
-holds the rendering, `checkExitCode()`, `probe()` and an abstract `errorLogPrefix()`, under the
-names `hampel/console-report` uses wherever it has one, and nothing specific to this add-on: the
-two copies differ in the namespace and one comment. Each command
-returns `EventLogging: ` as its prefix, which is what makes the error log mirror skip what
-`probe()` logs.
+**`Cli/RendersReport.php` is `Hampel/Monolog`'s file, whole, with the namespace changed.** Never
+edit it here: fix Monolog's and take it again. It is a copy because the shared package whose
+names it uses, `hampel/console-report`, needs PHP 8.3 and a polyfill XenForo does not ship. Each
+command returns `EventLogging: ` from `errorLogPrefix()`, which is what makes the error log
+mirror skip what `probe()` logs; a test scans the source for a server error log call without it.
+
+**The probe counts only its own record** — the `events` channel, its exact message, its run id —
+in both formats Monolog writes, because another record can quote it; and it brackets
+`xf_error_log` with `MAX(error_id)`, since a handler that fails quietly reports there and nowhere
+else. `xenforo-addon-validate` is the skill for both commands; read it before changing either.
 
 **The commands follow the `Hampel/Monolog` pair**: config reads and prints, validate exercises the
 real thing, four outcomes, exit 1 only on a failure, `--unattended` skips only the write.

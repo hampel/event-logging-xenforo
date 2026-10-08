@@ -26,6 +26,8 @@ class Validate extends Command
 {
 	use RendersReport;
 
+	private const PROBE_MESSAGE = 'Event logging probe';
+
 	protected function configure()
 	{
 		$this
@@ -214,30 +216,108 @@ class Validate extends Command
 		$path = MonologSettings::filePath();
 		$isFile = $path !== null && !preg_match('#^[a-z][a-z0-9+.-]*://#i', $path);
 		$offset = $isFile && is_file($path) ? (int) filesize($path) : 0;
+		$errorsBefore = (int) \XF::db()->fetchOne('SELECT MAX(error_id) FROM xf_error_log');
 
-		$logger->info('Event logging probe', ['event' => 'eventlogging.validate', 'probe' => true, 'run' => $run]);
+		$logger->info(self::PROBE_MESSAGE, ['event' => 'eventlogging.validate', 'probe' => true, 'run' => $run]);
 		$this->checkOk('probe record', "written to the " . Emitter::CHANNEL . " channel at Info, run {$run}");
 
+		$this->probeArrived($isFile ? $path : null, $offset, $run);
+
+		// a handler that fails quietly - an unwritable file, a refused post - reports here and
+		// nowhere else
+		$errors = \XF::db()->fetchAll('SELECT message FROM xf_error_log WHERE error_id > ? ORDER BY error_id', $errorsBefore);
+		$errors
+			? $this->checkFail('server error log', count($errors) . ' new: ' . strtok($errors[0]['message'], "\n"))
+			: $this->checkOk('server error log', 'nothing logged while the probe was written');
+	}
+
+	private function probeArrived(?string $path, int $offset, string $run): void
+	{
 		$level = MonologSettings::fileLevel();
-		if (!$isFile || $level === null)
+		if ($path === null || $level === null)
 		{
 			$this->checkSkip('log file', 'no log file to look in');
 			return;
 		}
 
-		clearstatcache(true, $path);
-		$found = is_file($path) && strpos((string) file_get_contents($path, false, null, $offset), $run) !== false;
+		[$own, $others] = $this->probeLines($path, $offset, $run);
+		$custom = MonologSettings::hasCustomFormatter();
+		$found = $custom ? ($own + $others) > 0 : $own > 0;
+
+		$notes = [];
+		if ($custom)
+		{
+			$notes[] = 'custom formatter - found by its run id alone';
+		}
+		else if ($others)
+		{
+			$notes[] = "{$others} other line" . ($others === 1 ? ' mentions' : 's mention')
+				. ' this run - another record quoting it - not counted';
+		}
+		$note = $notes ? ' (' . implode('; ', $notes) . ')' : '';
 
 		if ($level > MonologSettings::INFO)
 		{
 			$found
-				? $this->checkFail('log file', 'the probe arrived, though the level says Info is not written')
+				? $this->checkFail('log file', "the probe arrived, though the level says Info is not written{$note}")
 				: $this->checkSkip('log file', 'the probe was not written, as expected at ' . MonologSettings::levelName($level));
 			return;
 		}
 
 		$found
-			? $this->checkOk('log file', "the probe arrived in {$path}")
-			: $this->checkFail('log file', "the probe did not arrive in {$path}");
+			? $this->checkOk('log file', "the probe arrived in {$path}{$note}")
+			: $this->checkFail('log file', "the probe did not arrive in {$path}{$note}");
+	}
+
+	/**
+	 * The lines written since $offset that carry this run's id, split into the probe's own record
+	 * and anything else mentioning it. Another record can quote the probe - a mail transport that
+	 * logs what it sent, say - and must not be taken for it.
+	 *
+	 * @return array{0: int, 1: int} [the probe's own records, other lines mentioning the run]
+	 */
+	private function probeLines(string $path, int $offset, string $run): array
+	{
+		clearstatcache(true, $path);
+		if (!is_file($path))
+		{
+			return [0, 0];
+		}
+
+		$own = 0;
+		$others = 0;
+		$handle = fopen($path, 'r');
+		fseek($handle, $offset);
+		while (($line = fgets($handle)) !== false)
+		{
+			if (strpos($line, $run) === false)
+			{
+				continue;
+			}
+
+			self::isProbeRecord($line, $run) ? $own++ : $others++;
+		}
+		fclose($handle);
+
+		return [$own, $others];
+	}
+
+	/**
+	 * The probe's own record, in either format the Monolog add-on writes: on the events channel,
+	 * with the probe's message and this run's id in its context.
+	 */
+	public static function isProbeRecord(string $line, string $run): bool
+	{
+		$json = json_decode(trim($line), true);
+		if (is_array($json))
+		{
+			return ($json['channel'] ?? '') === Emitter::CHANNEL
+				&& ($json['message'] ?? '') === self::PROBE_MESSAGE
+				&& ($json['context']['run'] ?? '') === $run;
+		}
+
+		$start = '/^\[[^\]]*\] ' . preg_quote(Emitter::CHANNEL, '/') . '\.INFO: ' . preg_quote(self::PROBE_MESSAGE, '/') . ' \{/';
+
+		return (bool) preg_match($start, $line) && strpos($line, '"run":"' . $run . '"') !== false;
 	}
 }

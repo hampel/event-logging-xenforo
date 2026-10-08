@@ -117,6 +117,77 @@ class CommandsTest extends TestCase
 		$this->assertCount(1, $this->events->event('eventlogging.validate'));
 	}
 
+	/**
+	 * XenForo 2.2's console fork throws on `gray`, which takes a command down at its first
+	 * annotation. Grey goes through RendersReport::muted(), which falls back where it is missing.
+	 */
+	public function test_no_command_writes_grey_except_through_muted()
+	{
+		foreach (new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator(dirname(__DIR__, 2) . '/Cli')) AS $file)
+		{
+			if ($file->getExtension() !== 'php')
+			{
+				continue;
+			}
+
+			$source = file_get_contents($file->getPathname());
+			$this->assertSame(0, preg_match('/<fg=gr[ae]y/', $source), $file->getFilename() . ' writes <fg=gray> directly');
+		}
+	}
+
+	/**
+	 * The error log mirror skips rows that begin with this add-on's prefix. A row about a failure
+	 * to log that lacks it is mirrored at error, handled, fails the same way and is logged again.
+	 */
+	public function test_every_server_error_log_call_carries_the_prefix()
+	{
+		$calls = 0;
+		$root = dirname(__DIR__, 2);
+		foreach (new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($root)) AS $file)
+		{
+			$path = $file->getPathname();
+			if ($file->getExtension() !== 'php' || preg_match('#/(vendor|tests|_build|_releases|_output)/#', $path))
+			{
+				continue;
+			}
+
+			foreach (file($path) AS $number => $line)
+			{
+				if (!preg_match('/\\\\XF::log(Error|Exception)\(/', $line) || preg_match('#^\s*(//|\*)#', $line))
+				{
+					continue;
+				}
+
+				$calls++;
+				$this->assertMatchesRegularExpression(
+					'/ERROR_PREFIX|errorLogPrefix\(\)/',
+					$line,
+					basename($path) . ':' . ($number + 1) . ' logs to the server error log without the prefix'
+				);
+			}
+		}
+
+		$this->assertSame(2, $calls, 'the emitter and the report trait - a new call belongs in this count');
+	}
+
+	public function test_both_commands_return_the_prefix_the_mirror_skips()
+	{
+		foreach ([new Config(), new Validate()] AS $command)
+		{
+			$prefix = (new \ReflectionMethod($command, 'errorLogPrefix'))->invoke($command);
+
+			$this->assertSame('EventLogging: ', $prefix);
+			$this->assertContains(rtrim($prefix), \Hampel\EventLogging\ErrorLogMirror::SKIP_PREFIXES);
+		}
+	}
+
+	public function test_the_probe_reports_on_the_server_error_log()
+	{
+		[, $output] = $this->runCommand(new Validate());
+
+		$this->assertMatchesRegularExpression('/\[ ok \] server error log +nothing logged while the probe was written/', $output);
+	}
+
 	private function runCommand($command, array $input = []): array
 	{
 		$tester = new CommandTester($command);

@@ -68,6 +68,18 @@ class MonologSettings
 		});
 	}
 
+	/**
+	 * Whether config.php replaces the log file's formatter, so its layout is not one of the two
+	 * this add-on can recognise a record in.
+	 */
+	public static function hasCustomFormatter(): bool
+	{
+		return (bool) self::guard(function ()
+		{
+			return \Hampel\Monolog\Config::get('file', 'formatter') !== null;
+		});
+	}
+
 	public static function levelName(int $level): string
 	{
 		return self::LEVELS[$level] ?? (string) $level;
