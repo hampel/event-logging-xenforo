@@ -11,6 +11,8 @@ needs a person.
   `XF\Entity\UserBan` and `XF\Entity\PaymentProviderLog`
 - `entity_post_delete`, hinted to `XF\Entity\UserBan`
 - `app_api_complete`
+- `hampel_admin_api_redaction` — declares to the Admin API add-on, where it is installed, that this
+  add-on has no secrets. The event is that add-on's; without it the listener never runs.
 
 **Class extensions**
 

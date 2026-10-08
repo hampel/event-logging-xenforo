@@ -172,4 +172,18 @@ class Listener
 
 		return $ip === false ? null : $ip;
 	}
+
+	/**
+	 * Tells the Admin API which of this add-on's settings are secrets, so it shows the rest. None
+	 * are: every option is an on/off switch, and the only config.php key this add-on reads is the
+	 * Monolog add-on's, which that add-on declares for itself. An empty declaration still counts -
+	 * it is what moves an add-on's settings from withheld to shown.
+	 *
+	 * The event is the Admin API's, and this add-on does not require it: on a forum without it the
+	 * event is never fired and this costs nothing.
+	 */
+	public static function adminApiRedaction(array &$declarations)
+	{
+		$declarations['Hampel/EventLogging'] = [];
+	}
 }

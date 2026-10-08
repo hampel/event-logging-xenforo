@@ -63,6 +63,13 @@ against the other. It sits directly under *Log admin actions*, at display order 
 **Call sites check `Emitter::enabled()` before building the context**, so a group that is off
 costs one option read and no queries.
 
+**It answers `hampel_admin_api_redaction` with an empty declaration**, in `Listener.php`: no option
+is a secret, and the only `config.php` key it reads is `Hampel/Monolog`'s, which that add-on
+declares. The Admin API shows an add-on's text settings only once it has declared, and an empty
+list is a declaration. It is not a dependency — the event is the Admin API's, and nothing fires it
+where that add-on is absent. **A new option that is a secret is declared in the same commit**;
+`AdminApiRedactionTest` fails on one whose id reads like a credential until somebody decides.
+
 ## What a record may hold
 
 **Identifiers, plus what an administrator needs to read the line — never content, and never a
