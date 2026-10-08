@@ -42,6 +42,11 @@ class Config extends Command
 				: $this->muted('off'));
 		}
 
+		if (Emitter::enabled('admin'))
+		{
+			$this->detail('admin keep-alives', \XF::options()->offsetGet('eventLoggingAdminSkipKeepAlive') ? 'skipped' : 'recorded');
+		}
+
 		$this->heading('Log file');
 		$this->detail('channel', Emitter::CHANNEL);
 

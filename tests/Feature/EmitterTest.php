@@ -14,7 +14,8 @@ class EmitterTest extends TestCase
 	{
 		$options = $this->app()->finder('XF:Option')->where('addon_id', 'Hampel/EventLogging')->fetch();
 
-		$this->assertCount(count(Emitter::GROUPS), $options);
+		// one per group, and one that narrows the admin group
+		$this->assertCount(count(Emitter::GROUPS) + 1, $options);
 		foreach ($options AS $option)
 		{
 			$this->assertEmpty($option->default_value, "{$option->option_id} defaults to off");
@@ -35,8 +36,14 @@ class EmitterTest extends TestCase
 			FROM xf_option_group_relation AS r
 			INNER JOIN xf_option AS o ON (o.option_id = r.option_id)
 			WHERE r.group_id = ? AND o.addon_id = ?
+			ORDER BY r.display_order
 		', ['monolog', 'Hampel/EventLogging']);
-		$this->assertCount(count(Emitter::GROUPS), $orders);
+		$this->assertCount(count(Emitter::GROUPS) + 1, $orders);
+		$this->assertSame(
+			['eventLoggingAdmin', 'eventLoggingAdminSkipKeepAlive'],
+			array_slice(array_keys(array_filter($orders, function ($order) { return $order >= 2020 && $order < 2030; })), 0),
+			'the keep-alive option sits directly under the admin group it narrows'
+		);
 
 		$monologsLast = (int) $this->app()->db()->fetchOne('
 			SELECT MAX(r.display_order)

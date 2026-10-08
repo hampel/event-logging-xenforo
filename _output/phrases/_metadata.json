@@ -11,6 +11,12 @@
         "version_string": "1.0.0a1",
         "hash": "852b2fb91b558164b4bedc51bfea393a"
     },
+    "option.eventLoggingAdminSkipKeepAlive.txt": {
+        "global_cache": false,
+        "version_id": 1000013,
+        "version_string": "1.0.0a3",
+        "hash": "b63f0af7556c820af803f383d57f0d8e"
+    },
     "option.eventLoggingApi.txt": {
         "global_cache": false,
         "version_id": 1000011,
@@ -58,6 +64,12 @@
         "version_id": 1000011,
         "version_string": "1.0.0a1",
         "hash": "1bb2fad034c880237ca00046fde828a6"
+    },
+    "option_explain.eventLoggingAdminSkipKeepAlive.txt": {
+        "global_cache": false,
+        "version_id": 1000013,
+        "version_string": "1.0.0a3",
+        "hash": "d067bce3ba24410e2cac7061641ab080"
     },
     "option_explain.eventLoggingApi.txt": {
         "global_cache": false,

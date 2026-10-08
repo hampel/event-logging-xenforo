@@ -53,6 +53,13 @@ add-on on, with every group on. `MonologAbsentTest` loads this add-on alone to p
 type still completes. Both commands say so rather than describing Monolog's log file: a disabled
 add-on's options stay in the database, and still read as though they applied.
 
+**One option narrows a group instead of switching one on: `eventLoggingAdminSkipKeepAlive`.** An
+open admin control panel POSTs `login/keep-alive` on a timer and XenForo logs each one, so by
+default the mirror carries them — about 29 a day per open panel. The option drops that one route
+from `admin.action` and nothing else; XenForo's own admin log is untouched. It is off by default
+because the stream then matches `xf_admin_log` row for row, which is what lets a reader check one
+against the other. It sits directly under *Log admin actions*, at display order 2025.
+
 **Call sites check `Emitter::enabled()` before building the context**, so a group that is off
 costs one option read and no queries.
 

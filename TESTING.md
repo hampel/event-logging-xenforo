@@ -20,8 +20,9 @@ needs a person.
 
 **Other artifacts**
 
-- Options: eight, all boolean and all off by default, in the `monolog` option group — which
-  belongs to Monolog Logging Service. This add-on has no option group of its own.
+- Options: nine, all boolean and all off by default, in the `monolog` option group — which
+  belongs to Monolog Logging Service. Eight turn an event group on; the ninth leaves admin
+  keep-alive requests out. This add-on has no option group of its own.
 - Cron entry: `eventLoggingErrorLog`, every five minutes.
 - CLI commands: `event-logging:config` and `event-logging:validate`.
 - Simple cache: one value, the last server error sent.
@@ -94,8 +95,8 @@ development mode off** — not by the suite. Before a release, on a fresh XenFor
    - a member's thread, soft-deleted by a moderator with a reason, through the thread deleter
      service;
    - a ban with a reason, applied through the banning repository, then changed, then deleted;
-   - `logAdminRequest()` with a route path, as XenForo's admin controller passes it, and a form
-     value — or better, a real POST to the admin control panel;
+   - real POSTs to the admin control panel: a login, `login/keep-alive` and an option save —
+     then the keep-alive again with *Skip admin keep-alive requests* on;
    - `logSpamTrigger()` on a user checker and a content checker after a `moderated` decision;
    - an email to one recipient, one to two, and one through a transport nothing listens on;
    - `logCallback()` on the payment repository, once as a payment and once as an error;
@@ -115,13 +116,11 @@ hundred lines against the booted app; it is not kept in the repository.
 
 ## Needs a human
 
-1. **A browser.** With the moderation and admin groups on, delete a post and save an option in
-   the admin control panel, and read the two records. Every source above was driven from a script
-   or a hand-built request; nothing has been through a real page.
-2. **The options page.** Open *Options > Monolog*. This add-on's eight options follow Monolog's own
+1. **The options page.** Open *Options > Monolog*. This add-on's nine options follow Monolog's own
    with no heading between them; check they read as a group and that each explanation fits.
-3. **The scheduler.** With the errors group on, cause an error, wait for XenForo to run the cron
-   entry by itself, and confirm one `error.logged` record. The callback has only been called
-   directly.
-4. **A real payment callback.** The payment event has only been produced by calling the
+2. **A moderator action in a browser.** With the moderation group on, delete a post and read the
+   record. Admin requests have been through real HTTP — a login, the keep-alive and an option
+   save — and the cron entry has been fired by XenForo's own scheduler on live forums; moderator
+   actions have only been driven through XenForo's services from a script.
+3. **A real payment callback.** The payment event has only been produced by calling the
    repository, never by a provider.

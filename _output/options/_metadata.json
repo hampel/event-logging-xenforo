@@ -2,6 +2,9 @@
     "eventLoggingAdmin.json": {
         "hash": "250247ee8e6bae2e8c69d9ecaf70f633"
     },
+    "eventLoggingAdminSkipKeepAlive.json": {
+        "hash": "86ffcabf1894a1ef99e31ad9b92bd517"
+    },
     "eventLoggingApi.json": {
         "hash": "d2b685fb336bfc735aeaaa459aeda886"
     },

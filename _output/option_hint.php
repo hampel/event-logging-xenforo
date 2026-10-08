@@ -12,6 +12,7 @@ namespace XF;
 
 /**
  * @property bool|null $eventLoggingAdmin Log admin actions
+ * @property bool|null $eventLoggingAdminSkipKeepAlive Skip admin keep-alive requests
  * @property bool|null $eventLoggingApi Log API requests
  * @property bool|null $eventLoggingAuth Log failed logins
  * @property bool|null $eventLoggingErrors Log server errors

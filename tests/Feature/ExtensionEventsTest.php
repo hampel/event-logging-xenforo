@@ -65,6 +65,48 @@ class ExtensionEventsTest extends TestCase
 		$this->assertSame(1, $records[0]['context']['actor_user_id']);
 	}
 
+	/**
+	 * XenForo logs the keep-alive, so the mirror carries it unless the owner says otherwise.
+	 */
+	public function test_a_keep_alive_is_recorded_by_default()
+	{
+		$this->enableGroup('admin');
+		$this->actingAsMember(['user_id' => 1, 'is_admin' => true]);
+
+		$this->dispatch('login/keep-alive', 'admin', [], [], 'POST');
+
+		$this->assertCount(1, $this->events->event('admin.action'));
+	}
+
+	public function test_a_keep_alive_is_left_out_when_the_option_is_on_and_still_reaches_the_admin_log()
+	{
+		$this->enableGroup('admin');
+		$this->setOption('eventLoggingAdminSkipKeepAlive', true);
+		$this->actingAsMember(['user_id' => 1, 'is_admin' => true]);
+		$before = (int) $this->app()->db()->fetchOne('SELECT COUNT(*) FROM xf_admin_log');
+
+		$this->dispatch('login/keep-alive', 'admin', [], [], 'POST');
+
+		$this->assertSame([], $this->events->records);
+		$this->assertSame($before + 1, (int) $this->app()->db()->fetchOne('SELECT COUNT(*) FROM xf_admin_log'), "XenForo's own log is untouched");
+	}
+
+	public function test_the_option_leaves_every_other_admin_request_alone()
+	{
+		$this->enableGroup('admin');
+		$this->setOption('eventLoggingAdminSkipKeepAlive', true);
+		$repo = $this->app()->repository('XF:AdminLog');
+
+		$repo->logAdminRequest(3, 'options/update', [], '203.0.113.9');
+		$repo->logAdminRequest(3, 'login/login', [], '203.0.113.9');
+		$repo->logAdminRequest(3, 'login/keep-alive-settings', [], '203.0.113.9');
+
+		$this->assertSame(
+			['options/update', 'login/login', 'login/keep-alive-settings'],
+			array_column(array_column($this->events->event('admin.action'), 'context'), 'route')
+		);
+	}
+
 	public function test_an_admin_request_xenforo_does_not_log_emits_nothing()
 	{
 		$this->enableGroup('admin');

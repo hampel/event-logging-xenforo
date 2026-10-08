@@ -105,6 +105,10 @@ alerts should match on `event`, never on the message, which may be reworded.
 | Payment callbacks | `payment.callback` | info | `provider_log_id`, `provider_id`, `log_type`, `transaction_id` |
 | API requests | `api.request` | info | `api_key_id`, `user_id`, `method`, `route`, `status` |
 
+- **An open admin control panel produces an `admin.action` about every 50 minutes**, route
+  `login/keep-alive` — XenForo logs each one, so they are mirrored. *Skip admin keep-alive
+  requests*, under *Log admin actions*, leaves them out; XenForo's own admin log still has them.
+  Logging in to the admin control panel is an `admin.action` too, route `login/login`.
 - **`moderator.action`, `admin.action`, `spam.triggered` and `payment.callback` mirror XenForo's
   own logs**, one record per entry. The ID in each leads to the full entry in the admin control
   panel.
@@ -115,7 +119,8 @@ alerts should match on `event`, never on the message, which may be reworded.
 - **`reason`** on `moderator.action` is the reason the moderator gave, or `null` where the action
   has none.
 - **`payment.callback` is a warning** when the provider log entry is an error.
-- **`api.request` is one record per request.** Leave it off for an API client that polls.
+- **`api.request` is one record per request.** Leave it off for an API client that polls. A
+  request that ends in an uncaught error produces no `api.request`; it arrives as `error.logged`.
 - **Dates** are ISO 8601, in UTC.
 
 A record, in the JSON format:

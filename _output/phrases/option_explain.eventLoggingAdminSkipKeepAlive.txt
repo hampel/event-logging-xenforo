@@ -1,0 +1,1 @@
+An open admin control panel sends a keep-alive request about every 50 minutes, and XenForo adds each one to its admin log. Turn this on to leave them out of the admin action records. It applies only while Log admin actions is on.

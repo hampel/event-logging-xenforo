@@ -35,6 +35,7 @@ abstract class TestCase extends BaseTestCase
 		{
 			$off[$definition['option']] = false;
 		}
+		$off['eventLoggingAdminSkipKeepAlive'] = false;
 		$this->setOptions($off);
 
 		$this->events = new RecordingLogger();
