@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## 1.0.0 Beta 2 (2026-10-10)
+
+- changed: the Server errors group does nothing on a forum with no server error log table, where
+  before it decided by XenForo version
+- changed: the warning shown when installing on an untested XenForo says only which versions it
+  has been tested on
+- changed: a one-sentence add-on description
+- new: links to the resource page, the discussion thread and the source repository
+
 ## 1.0.0 Beta 1 (2026-10-09)
 
 - new: sends a structured record of forum activity to the log through Monolog Logging Service
