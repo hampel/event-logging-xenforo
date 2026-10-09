@@ -1,7 +1,7 @@
 {
     "legacy_addon_id": "",
     "title": "Event Logging for Monolog",
-    "description": "Sends a record of what happens on your forum - moderator and admin actions, bans, spam triggers, failed logins, server errors, email and payment callbacks - to your logs, through Monolog. Records nothing until an administrator turns an event group on.",
+    "description": "Sends a structured record of your forum's activity to your logs through Monolog.",
     "version_id": 1000032,
     "version_string": "1.0.0b2",
     "dev": "Simon Hampel",
