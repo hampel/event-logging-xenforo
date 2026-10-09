@@ -270,6 +270,27 @@ class ErrorLogMirrorTest extends TestCase
 		$this->assertContains($id, $sent);
 	}
 
+	public function test_this_forum_has_an_error_log_to_read()
+	{
+		$this->assertTrue(ErrorLogMirror::isSupported());
+	}
+
+	/**
+	 * A forum with no server error log table sends nothing and keeps no position, rather than
+	 * failing on every cron run.
+	 */
+	public function test_a_forum_with_no_error_log_table_does_nothing()
+	{
+		$this->enableGroup('errors');
+		$this->mirror()->run();
+		$this->logError('Would have been sent');
+		$this->setStaticProperty(ErrorLogMirror::class, 'tableExists', false);
+
+		$this->assertSame(0, $this->mirror()->run());
+		$this->assertSame([], $this->events->records);
+		$this->assertNull($this->position());
+	}
+
 	public function test_the_cron_entry_runs_the_mirror()
 	{
 		$entry = $this->app()->em()->find('XF:CronEntry', 'eventLoggingErrorLog');

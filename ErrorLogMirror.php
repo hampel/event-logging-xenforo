@@ -36,12 +36,29 @@ class ErrorLogMirror
 		$this->app = $app;
 	}
 
+	/** @var bool|null whether xf_error_log exists, once asked */
+	private static $tableExists;
+
 	/**
-	 * XenForo 2.4 writes its errors through Monolog itself and has no xf_error_log to read.
+	 * Whether this forum has a server error log table to read. Every XenForo this add-on supports
+	 * has one; the check is so that a forum without it does nothing rather than failing on every
+	 * cron run.
 	 */
 	public static function isSupported(): bool
 	{
-		return \XF::$versionId < 2040000;
+		if (self::$tableExists === null)
+		{
+			try
+			{
+				self::$tableExists = \XF::db()->getSchemaManager()->tableExists('xf_error_log');
+			}
+			catch (\Throwable $e)
+			{
+				return false;
+			}
+		}
+
+		return self::$tableExists;
 	}
 
 	/**

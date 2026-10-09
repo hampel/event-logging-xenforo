@@ -155,8 +155,10 @@ event and nothing to extend.
   fail the same way and are logged again, one round per run. A new `\XF::logError()` in either
   add-on about a logging failure needs its prefix there. `Hampel/Monolog` prefixes every row it
   writes `Monolog:`, and has a test that says so.
-- **It is gated on XenForo below 2.4**, which logs errors through Monolog itself and has no such
-  table.
+- **It does nothing on a forum with no `xf_error_log` table**: `ErrorLogMirror::isSupported()`
+  asks the schema manager once per request. **Do not name an unreleased XenForo version in
+  anything published** — Simon, 2026-10-10 — so this is a check for the table, not for a
+  version.
 
 **One slow loop remains, by design.** If Monolog emails at `error` and the mail transport is
 broken, each mirrored error tries to send an email, XenForo logs that failure, and the next run

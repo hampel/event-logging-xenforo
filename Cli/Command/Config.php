@@ -70,7 +70,7 @@ class Config extends Command
 		$this->heading('Server error log');
 		if (!ErrorLogMirror::isSupported())
 		{
-			$this->detail('mirror', 'not used - XenForo ' . \XF::$version . ' logs its errors through Monolog itself');
+			$this->detail('mirror', 'not used - this forum has no server error log table');
 		}
 		else
 		{

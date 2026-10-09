@@ -166,7 +166,7 @@ class Validate extends Command
 	{
 		if (!ErrorLogMirror::isSupported())
 		{
-			$this->checkSkip('error log mirror', 'not used - XenForo ' . \XF::$version . ' logs its errors through Monolog itself');
+			$this->checkSkip('error log mirror', 'not used - this forum has no server error log table');
 			return;
 		}
 

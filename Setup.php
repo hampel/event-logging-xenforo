@@ -26,11 +26,10 @@ class Setup extends AbstractSetup
 	public function checkRequirements(&$errors = [], &$warnings = [])
 	{
 		// a warning, not an error, so a forum on a newer XenForo can still install or upgrade
-		if (!ErrorLogMirror::isSupported())
+		if (\XF::$versionId >= 2040000)
 		{
-			$warnings[] = "XenForo 2.4 and later log server errors through Monolog themselves, so this "
-				. "add-on's Log server errors option does nothing there. This version has not been tested "
-				. "on XenForo 2.4 or later.";
+			$warnings[] = "This version of Event Logging for Monolog has been tested on XenForo 2.2 and 2.3 "
+				. "only. It is expected to work, but check for a newer version that has been tested on yours.";
 		}
 	}
 }

@@ -169,7 +169,6 @@ Data* on, their IP address and the URL.
   control panel.
 - **Errors about logging itself are skipped** — a failed Slack post, say — since sending one would
   fail the same way and log another.
-- **XenForo 2.4 logs its errors through Monolog itself**, so there this group does nothing.
 
 A failed scheduled job or a failed email is written to the server error log by XenForo, so both
 arrive this way.
