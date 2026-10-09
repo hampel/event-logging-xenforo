@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 1.0.0 (unreleased)
+## 1.0.0 Beta 1 (2026-10-09)
 
 - new: sends a structured record of forum activity to the log through Monolog Logging Service
   5.0.1, on the `events` channel, with a stable `event` name in each record
