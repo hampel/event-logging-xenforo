@@ -7,8 +7,11 @@
     "dev": "Simon Hampel",
     "dev_url": "https://xenforo.com/community/members/sim.4264/",
     "faq_url": "",
-    "support_url": "",
-    "extra_urls": [],
+    "support_url": "https://xenforo.com/community/threads/event-logging-for-monolog.240628/",
+    "extra_urls": {
+        "Addon": "https://xenforo.com/community/resources/event-logging-for-monolog.10887/",
+        "Git Repository": "https://github.com/hampel/event-logging-xenforo"
+    },
     "require": {
         "php": [
             "7.4",

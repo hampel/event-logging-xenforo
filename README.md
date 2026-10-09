@@ -11,6 +11,9 @@ nothing to members and sends no alerts.
 
 By [Simon Hampel](https://xenforo.com/community/members/sim.4264/).
 
+- [Add-on: Event Logging for Monolog](https://xenforo.com/community/resources/event-logging-for-monolog.10887/)
+- [Discussion and support](https://xenforo.com/community/threads/event-logging-for-monolog.240628/)
+
 ## Requirements
 
 - XenForo 2.2 or later
