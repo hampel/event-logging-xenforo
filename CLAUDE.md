@@ -143,6 +143,12 @@ event and nothing to extend.
 - **Turning the group off deletes the position**, and the first run with none sets it to the
   newest error and sends nothing. Otherwise enabling the group would send every error logged while
   it was off.
+- **It keeps the date of the newest row sent as well as its id**, because a position past the end
+  of the table has two causes ids cannot tell apart: the newest rows deleted, where everything left
+  was sent, and the table emptied with its counter reset, where everything left is new. Past the
+  end, it sends only rows dated after the last one sent. A position with no date, from before the
+  date was kept, resumes from the end of the table rather than from 0, which re-sent the whole log
+  until `1.0.0b3`.
 - **Rows of the same type, file, line and message collapse into one record with a `count`.** A
   broken template logs on every page view. The message is in the key because everything
   `\XF::logError()` writes shares the other three.

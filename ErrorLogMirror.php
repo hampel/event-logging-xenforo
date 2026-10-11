@@ -15,6 +15,9 @@ class ErrorLogMirror
 {
 	public const CACHE_KEY = 'errorId';
 
+	/** The date of the newest row sent - what decides "new" once ids no longer can */
+	public const DATE_KEY = 'errorDate';
+
 	/** Rows read per run; a longer backlog is continued on the next */
 	public const BATCH = 2000;
 
@@ -72,9 +75,12 @@ class ErrorLogMirror
 		{
 			// forget the position, so turning the group on later starts from that moment rather
 			// than sending everything logged while it was off
-			if ($cache->keyExists(self::CACHE_KEY))
+			foreach ([self::CACHE_KEY, self::DATE_KEY] AS $key)
 			{
-				$cache->deleteValue(self::CACHE_KEY);
+				if ($cache->keyExists($key))
+				{
+					$cache->deleteValue($key);
+				}
 			}
 
 			return 0;
@@ -86,30 +92,51 @@ class ErrorLogMirror
 		if (!$cache->keyExists(self::CACHE_KEY))
 		{
 			$cache->setValue(self::CACHE_KEY, $max);
+			$cache->setValue(self::DATE_KEY, $this->newestDate($max));
 
 			return 0;
 		}
 
 		$last = (int) $cache->getValue(self::CACHE_KEY);
+		$lastDate = $cache->keyExists(self::DATE_KEY) ? (int) $cache->getValue(self::DATE_KEY) : null;
+
 		if ($last > $max)
 		{
-			// the table was emptied and its counter reset
-			$last = 0;
+			// The last row sent is gone. Either the newest rows were deleted - an administrator
+			// clearing the log, say - and what is left was all sent before, or the table was
+			// emptied and its counter reset, so what is left is all new. Ids cannot tell those
+			// apart and dates can: send only what is newer than the last row sent.
+			if ($lastDate === null)
+			{
+				// a position kept before dates were: resume from the end rather than replay
+				$cache->setValue(self::CACHE_KEY, $max);
+				$cache->setValue(self::DATE_KEY, $this->newestDate($max));
+
+				return 0;
+			}
+
+			$where = 'exception_date > ? AND error_id <= ?';
+			$params = [$lastDate, $max];
 		}
-		if ($last == $max)
+		else if ($last == $max)
 		{
 			return 0;
+		}
+		else
+		{
+			$where = 'error_id > ? AND error_id <= ?';
+			$params = [$last, $max];
 		}
 
 		// not trace_string, which is long, nor request_state, which holds the request's whole
 		// _GET and _POST
-		$rows = $db->fetchAll($db->limit('
+		$rows = $db->fetchAll($db->limit("
 			SELECT error_id, exception_date, user_id, exception_type, filename, line,
-				LEFT(message, ' . self::MESSAGE_LENGTH . ') AS message
+				LEFT(message, " . self::MESSAGE_LENGTH . ") AS message
 			FROM xf_error_log
-			WHERE error_id > ? AND error_id <= ?
+			WHERE {$where}
 			ORDER BY error_id
-		', self::BATCH), [$last, $max]);
+		", self::BATCH), $params);
 
 		$emitted = 0;
 		foreach ($this->collapse($rows) AS $error)
@@ -120,7 +147,24 @@ class ErrorLogMirror
 
 		$cache->setValue(self::CACHE_KEY, $rows ? (int) end($rows)['error_id'] : $max);
 
+		$newest = $rows ? max(array_map('intval', array_column($rows, 'exception_date'))) : null;
+		if ($lastDate === null)
+		{
+			$lastDate = $this->newestDate($last);
+		}
+		$cache->setValue(self::DATE_KEY, max($lastDate, (int) $newest));
+
 		return $emitted;
+	}
+
+	/**
+	 * The date of the newest row at or below $id, or 0 for an empty table.
+	 */
+	protected function newestDate(int $id): int
+	{
+		return (int) $this->app->db()->fetchOne(
+			'SELECT MAX(exception_date) FROM xf_error_log WHERE error_id <= ?', $id
+		);
 	}
 
 	/**

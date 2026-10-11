@@ -168,6 +168,8 @@ Data* on, their IP address and the URL.
   logged. Monolog Logging Service uses it so that email and Slack skip a repeat of one error
   without also skipping a different one. Group and alert on it.
 - **Turning the group on starts from that moment.** Errors already in the log are not sent.
+- **Deleting errors from the log does not send the rest again**, and an error logged after the
+  log is emptied is still sent.
 - **The stack trace and request data are never sent.** `error_id` leads to both in the admin
   control panel.
 - **Errors about logging itself are skipped** — a failed Slack post, say — since sending one would

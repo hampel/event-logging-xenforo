@@ -18,6 +18,7 @@ class ErrorLogMirrorTest extends TestCase
 		parent::setUp();
 
 		$this->app()->simpleCache()->deleteValue('Hampel/EventLogging', ErrorLogMirror::CACHE_KEY);
+		$this->app()->simpleCache()->deleteValue('Hampel/EventLogging', ErrorLogMirror::DATE_KEY);
 	}
 
 	private function mirror(): ErrorLogMirror
@@ -25,11 +26,11 @@ class ErrorLogMirrorTest extends TestCase
 		return new ErrorLogMirror($this->app());
 	}
 
-	private function logError(string $message, string $type = 'ErrorException', string $file = 'src/addons/Foo/Bar.php', int $line = 10): int
+	private function logError(string $message, string $type = 'ErrorException', string $file = 'src/addons/Foo/Bar.php', int $line = 10, int $date = 1893456000): int
 	{
 		$db = $this->app()->db();
 		$db->insert('xf_error_log', [
-			'exception_date' => 1893456000,
+			'exception_date' => $date,
 			'user_id' => 5,
 			'ip_address' => '',
 			'exception_type' => $type,
@@ -258,37 +259,76 @@ class ErrorLogMirrorTest extends TestCase
 		$this->assertSame([], $this->events->records);
 	}
 
-	public function test_an_emptied_error_log_starts_again_from_its_first_row()
+	/**
+	 * An administrator clearing the newest errors leaves the last one sent past the end of the
+	 * table. What is left was all sent before, and must not be sent again.
+	 */
+	public function test_deleting_the_newest_rows_replays_nothing()
 	{
 		$this->enableGroup('errors');
-		$id = $this->logError('After the log was cleared');
-		$this->app()->simpleCache()->setValue('Hampel/EventLogging', ErrorLogMirror::CACHE_KEY, $id + 1000);
-
 		$this->mirror()->run();
+		$old = $this->logError('Sent before', 'ErrorException', 'src/addons/Foo/Bar.php', 10, 1893456000);
+		$this->logError('Sent and then deleted', 'TypeError', 'src/addons/Foo/Baz.php', 3, 1893456100);
+		$newest = $this->logError('Also deleted', 'TypeError', 'src/addons/Foo/Qux.php', 4, 1893456200);
+		$this->mirror()->run();
+		$this->assertCount(3, $this->events->event('error.logged'));
 
-		$sent = array_column(array_column($this->events->event('error.logged'), 'context'), 'last_error_id');
-		$this->assertContains($id, $sent);
-	}
+		$this->app()->db()->delete('xf_error_log', 'error_id > ?', $old);
+		$this->assertGreaterThan($old, $this->position(), 'the last one sent is now past the end of the table');
 
-	public function test_this_forum_has_an_error_log_to_read()
-	{
-		$this->assertTrue(ErrorLogMirror::isSupported());
+		$this->assertSame(0, $this->mirror()->run());
+		$this->assertCount(3, $this->events->event('error.logged'), 'nothing was sent again');
+		$this->assertSame($old, $this->position(), 'it resumes from the end of the table');
+
+		// and the next error after that is still sent
+		$this->logError('After the deletion', 'ErrorException', 'src/addons/Foo/New.php', 1, 1893456300);
+		$this->assertSame(1, $this->mirror()->run());
+		$this->assertSame('After the deletion', $this->events->event('error.logged')[3]['context']['error_message']);
 	}
 
 	/**
-	 * A forum with no server error log table sends nothing and keeps no position, rather than
-	 * failing on every cron run.
+	 * Emptied and its counter reset, the table's ids start again below the last one sent, and
+	 * every row in it is new. Its dates are what say so.
 	 */
-	public function test_a_forum_with_no_error_log_table_does_nothing()
+	public function test_an_emptied_table_sends_what_is_newer_than_the_last_row_sent()
+	{
+		$this->enableGroup('errors');
+		$id = $this->logError('After the log was cleared', 'ErrorException', 'src/addons/Foo/Bar.php', 10, 1893456500);
+		$this->app()->simpleCache()->setValue('Hampel/EventLogging', ErrorLogMirror::CACHE_KEY, $id + 1000);
+		$this->app()->simpleCache()->setValue('Hampel/EventLogging', ErrorLogMirror::DATE_KEY, 1893456400);
+
+		$this->assertSame(1, $this->mirror()->run());
+
+		$this->assertSame('After the log was cleared', $this->events->event('error.logged')[0]['context']['error_message']);
+		$this->assertSame($id, $this->position());
+	}
+
+	/**
+	 * A position kept by a release that did not keep a date: resume from the end of the table,
+	 * rather than replay it.
+	 */
+	public function test_a_position_with_no_date_past_the_end_of_the_table_resumes_from_the_end()
+	{
+		$this->enableGroup('errors');
+		$id = $this->logError('Already sent by an earlier release');
+		$this->app()->simpleCache()->setValue('Hampel/EventLogging', ErrorLogMirror::CACHE_KEY, $id + 1000);
+		$this->app()->simpleCache()->deleteValue('Hampel/EventLogging', ErrorLogMirror::DATE_KEY);
+
+		$this->assertSame(0, $this->mirror()->run());
+
+		$this->assertSame([], $this->events->records);
+		$this->assertSame($id, $this->position());
+	}
+
+	public function test_turning_the_group_off_forgets_the_date_too()
 	{
 		$this->enableGroup('errors');
 		$this->mirror()->run();
-		$this->logError('Would have been sent');
-		$this->setStaticProperty(ErrorLogMirror::class, 'tableExists', false);
+		$this->setOption('eventLoggingErrors', false);
 
-		$this->assertSame(0, $this->mirror()->run());
-		$this->assertSame([], $this->events->records);
-		$this->assertNull($this->position());
+		$this->mirror()->run();
+
+		$this->assertFalse($this->app()->simpleCache()->keyExists('Hampel/EventLogging', ErrorLogMirror::DATE_KEY));
 	}
 
 	public function test_the_cron_entry_runs_the_mirror()

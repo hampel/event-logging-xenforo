@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 1.0.0 Beta 3 (unreleased)
+
+- fix: deleting the newest entries from the server error log made the Server errors group send
+  every entry left in it again
+
 ## 1.0.0 Beta 2 (2026-10-10)
 
 - changed: the Server errors group does nothing on a forum with no server error log table, where
