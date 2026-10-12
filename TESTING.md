@@ -27,7 +27,7 @@ needs a person.
   keep-alive requests out. This add-on has no option group of its own.
 - Cron entry: `eventLoggingErrorLog`, every five minutes.
 - CLI commands: `event-logging:config` and `event-logging:validate`.
-- Simple cache: one value, the last server error sent.
+- Simple cache: two values, the id and the date of the last server error sent.
 - No tables, columns, templates, template modifications, routes or permissions.
 
 ## Fragile points
@@ -72,8 +72,9 @@ event through XenForo's own write path and covers:
 - each event's exact fields;
 - that a submitted form, a token, a post or email body, a spam check's detail and a payment
   provider's data appear in no record;
-- the error log mirror's position, collapsing, fingerprint and skipping, and that Monolog emails a
-  different error and skips a repeat;
+- the error log mirror's position, including after errors are deleted from the log or the log is
+  emptied, and how both commands report it; its collapsing, fingerprint and skipping, and that
+  Monolog emails a different error and skips a repeat;
 - both commands, and the exit code for every mix of warning and failure with and without
   `--strict`;
 - one record through the real Monolog add-on to a JSON file.

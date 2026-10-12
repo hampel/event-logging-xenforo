@@ -4,6 +4,8 @@
 
 - fix: deleting the newest entries from the server error log made the Server errors group send
   every entry left in it again
+- changed: `event-logging:config` and `event-logging:validate` say when the last error sent is past
+  the end of the server error log
 
 ## 1.0.0 Beta 2 (2026-10-10)
 

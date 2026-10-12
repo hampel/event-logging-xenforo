@@ -87,46 +87,27 @@ class ErrorLogMirror
 		}
 
 		$db = $this->app->db();
-		$max = (int) $db->fetchOne('SELECT MAX(error_id) FROM xf_error_log');
+		$position = $this->position();
+		$max = $position['max'];
 
-		if (!$cache->keyExists(self::CACHE_KEY))
+		if ($position['last'] === null || ($position['pastEnd'] && $position['lastDate'] === null))
 		{
+			// no position yet, so start from the newest error; or one past the end of the table
+			// kept before dates were, which resumes from the end rather than replay
 			$cache->setValue(self::CACHE_KEY, $max);
 			$cache->setValue(self::DATE_KEY, $this->newestDate($max));
 
 			return 0;
 		}
-
-		$last = (int) $cache->getValue(self::CACHE_KEY);
-		$lastDate = $cache->keyExists(self::DATE_KEY) ? (int) $cache->getValue(self::DATE_KEY) : null;
-
-		if ($last > $max)
-		{
-			// The last row sent is gone. Either the newest rows were deleted - an administrator
-			// clearing the log, say - and what is left was all sent before, or the table was
-			// emptied and its counter reset, so what is left is all new. Ids cannot tell those
-			// apart and dates can: send only what is newer than the last row sent.
-			if ($lastDate === null)
-			{
-				// a position kept before dates were: resume from the end rather than replay
-				$cache->setValue(self::CACHE_KEY, $max);
-				$cache->setValue(self::DATE_KEY, $this->newestDate($max));
-
-				return 0;
-			}
-
-			$where = 'exception_date > ? AND error_id <= ?';
-			$params = [$lastDate, $max];
-		}
-		else if ($last == $max)
+		if ($position['where'] === null)
 		{
 			return 0;
 		}
-		else
-		{
-			$where = 'error_id > ? AND error_id <= ?';
-			$params = [$last, $max];
-		}
+
+		$last = $position['last'];
+		$lastDate = $position['lastDate'];
+		$where = $position['where'];
+		$params = $position['params'];
 
 		// not trace_string, which is long, nor request_state, which holds the request's whole
 		// _GET and _POST
@@ -155,6 +136,66 @@ class ErrorLogMirror
 		$cache->setValue(self::DATE_KEY, max($lastDate, (int) $newest));
 
 		return $emitted;
+	}
+
+	/**
+	 * Where the mirror is, and what the next run will read - the one place that decides it, for
+	 * the run and for the commands that describe it.
+	 *
+	 * `last` is null before the first run. `pastEnd` is the last row sent being gone: either the
+	 * newest rows were deleted - an administrator clearing the log, say - and what is left was all
+	 * sent before, or the table was emptied and its counter reset, so what is left is all new. Ids
+	 * cannot tell those apart and dates can, so past the end the next run reads only what is newer
+	 * than the last row sent. `where` is null when there is nothing to read.
+	 *
+	 * @return array{last: ?int, lastDate: ?int, max: int, pastEnd: bool, where: ?string, params: array}
+	 */
+	public function position(): array
+	{
+		$cache = $this->app->simpleCache()->getSet('Hampel/EventLogging');
+		$max = (int) $this->app->db()->fetchOne('SELECT MAX(error_id) FROM xf_error_log');
+
+		$last = $cache->keyExists(self::CACHE_KEY) ? (int) $cache->getValue(self::CACHE_KEY) : null;
+		$lastDate = $cache->keyExists(self::DATE_KEY) ? (int) $cache->getValue(self::DATE_KEY) : null;
+		$pastEnd = $last !== null && $last > $max;
+
+		$where = null;
+		$params = [];
+		if ($pastEnd && $lastDate !== null)
+		{
+			$where = 'exception_date > ? AND error_id <= ?';
+			$params = [$lastDate, $max];
+		}
+		else if ($last !== null && $last < $max)
+		{
+			$where = 'error_id > ? AND error_id <= ?';
+			$params = [$last, $max];
+		}
+
+		return [
+			'last' => $last,
+			'lastDate' => $lastDate,
+			'max' => $max,
+			'pastEnd' => $pastEnd,
+			'where' => $where,
+			'params' => $params,
+		];
+	}
+
+	/**
+	 * How many rows the next run has to read, before its batch limit.
+	 */
+	public function waiting(): int
+	{
+		$position = $this->position();
+		if ($position['where'] === null)
+		{
+			return 0;
+		}
+
+		return (int) $this->app->db()->fetchOne(
+			"SELECT COUNT(*) FROM xf_error_log WHERE {$position['where']}", $position['params']
+		);
 	}
 
 	/**

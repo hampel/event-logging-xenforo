@@ -148,7 +148,8 @@ event and nothing to extend.
   was sent, and the table emptied with its counter reset, where everything left is new. Past the
   end, it sends only rows dated after the last one sent. A position with no date, from before the
   date was kept, resumes from the end of the table rather than from 0, which re-sent the whole log
-  until `1.0.0b3`.
+  until `1.0.0b3`. `ErrorLogMirror::position()` is the one place that decides what the next run
+  reads; the run and both commands use it, so what they report cannot drift from what is sent.
 - **Rows of the same type, file, line and message collapse into one record with a `count`.** A
   broken template logs on every page view. The message is in the key because everything
   `\XF::logError()` writes shares the other three.

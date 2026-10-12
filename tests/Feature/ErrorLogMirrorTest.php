@@ -1,8 +1,11 @@
 <?php namespace Tests\Feature;
 
+use Hampel\EventLogging\Cli\Command\Config;
+use Hampel\EventLogging\Cli\Command\Validate;
 use Hampel\EventLogging\Emitter;
 use Hampel\EventLogging\ErrorLogMirror;
 use Hampel\Testing\Concerns\UsesDatabaseTransactions;
+use Symfony\Component\Console\Tester\CommandTester;
 use Tests\TestCase;
 
 class ErrorLogMirrorTest extends TestCase
@@ -42,6 +45,14 @@ class ErrorLogMirrorTest extends TestCase
 		]);
 
 		return (int) $db->lastInsertId();
+	}
+
+	private function runCommand($command, array $input = []): array
+	{
+		$tester = new CommandTester($command);
+		$code = $tester->execute($input, ['decorated' => false]);
+
+		return [$code, $tester->getDisplay()];
 	}
 
 	private function position()
@@ -318,6 +329,61 @@ class ErrorLogMirrorTest extends TestCase
 
 		$this->assertSame([], $this->events->records);
 		$this->assertSame($id, $this->position());
+	}
+
+	/**
+	 * The commands describe the mirror from the same place the run decides, so a position past the
+	 * end of the log is said to be one, and nothing is reported as waiting that will not be sent.
+	 */
+	public function test_both_commands_say_when_the_position_is_past_the_end_of_the_log()
+	{
+		$this->enableGroup('errors');
+		$this->mirror()->run();
+		$old = $this->logError('Sent before', 'ErrorException', 'src/addons/Foo/Bar.php', 10, 1893456000);
+		$gone = $this->logError('Sent and then deleted', 'TypeError', 'src/addons/Foo/Baz.php', 3, 1893456100);
+		$this->mirror()->run();
+		$this->app()->db()->delete('xf_error_log', 'error_id = ?', $gone);
+
+		[, $validate] = $this->runCommand(new Validate(), ['--unattended' => true]);
+		[, $config] = $this->runCommand(new Config());
+
+		$this->assertMatchesRegularExpression(
+			"/\\[ ok \\] position +error #{$gone}, past the end of the log \\(#{$old}\\) - 0 waiting/", $validate
+		);
+		$this->assertMatchesRegularExpression("/last error sent \\.+ #{$gone} \\(past the end of the log, #{$old}\\)/", $config);
+	}
+
+	public function test_validate_counts_what_an_emptied_and_refilled_log_has_waiting()
+	{
+		$this->enableGroup('errors');
+		$id = $this->logError('After the log was cleared', 'ErrorException', 'src/addons/Foo/Bar.php', 10, 1893456500);
+		$this->logError('Older than the last one sent', 'ErrorException', 'src/addons/Foo/Bar.php', 11, 1893456300);
+		$this->app()->simpleCache()->setValue('Hampel/EventLogging', ErrorLogMirror::CACHE_KEY, $id + 1000);
+		$this->app()->simpleCache()->setValue('Hampel/EventLogging', ErrorLogMirror::DATE_KEY, 1893456400);
+
+		$this->assertSame(1, $this->mirror()->waiting());
+
+		[, $validate] = $this->runCommand(new Validate(), ['--unattended' => true]);
+
+		$this->assertMatchesRegularExpression('/past the end of the log \\(#\\d+\\) - 1 waiting for the next run/', $validate);
+		$this->assertSame(1, $this->mirror()->run(), 'and the run sends what was counted');
+	}
+
+	public function test_an_ordinary_position_is_reported_as_before()
+	{
+		$this->enableGroup('errors');
+		$this->mirror()->run();
+		$this->logError('One');
+		$id = $this->logError('Two', 'TypeError', 'src/addons/Foo/Baz.php', 3);
+
+		[, $validate] = $this->runCommand(new Validate(), ['--unattended' => true]);
+		$this->assertMatchesRegularExpression('/\\[ ok \\] position +error #\\d+ - 2 waiting for the next run/', $validate);
+		$this->assertStringNotContainsString('past the end', $validate);
+
+		$this->mirror()->run();
+		[, $config] = $this->runCommand(new Config());
+		$this->assertMatchesRegularExpression("/last error sent \\.+ #{$id}\\s/", $config);
+		$this->assertStringNotContainsString('past the end', $config);
 	}
 
 	public function test_turning_the_group_off_forgets_the_date_too()

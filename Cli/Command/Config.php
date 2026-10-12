@@ -74,10 +74,11 @@ class Config extends Command
 		}
 		else
 		{
-			$cache = \XF::app()->simpleCache()->getSet('Hampel/EventLogging');
+			$position = (new ErrorLogMirror(\XF::app()))->position();
 			$this->detail('mirror', Emitter::enabled('errors') ? 'on' : $this->muted('off'));
-			$this->detail('last error sent', $cache->keyExists(ErrorLogMirror::CACHE_KEY)
-				? '#' . (int) $cache->getValue(ErrorLogMirror::CACHE_KEY) : '');
+			$this->detail('last error sent', $position['last'] === null ? '' : "#{$position['last']}" . (
+				$position['pastEnd'] ? ' ' . $this->muted("(past the end of the log, #{$position['max']})") : ''
+			));
 		}
 
 		$this->report->writeln('');

@@ -184,19 +184,26 @@ class Validate extends Command
 		}
 		$this->checkOk('cron entry', 'active');
 
-		$cache = \XF::app()->simpleCache()->getSet('Hampel/EventLogging');
-		if (!$cache->keyExists(ErrorLogMirror::CACHE_KEY))
+		$mirror = new ErrorLogMirror(\XF::app());
+		$position = $mirror->position();
+		if ($position['last'] === null)
 		{
 			$this->checkOk('position', 'not started - the next cron run begins from the newest error');
 			return;
 		}
 
-		$last = (int) $cache->getValue(ErrorLogMirror::CACHE_KEY);
-		$waiting = (int) \XF::db()->fetchOne('SELECT COUNT(*) FROM xf_error_log WHERE error_id > ?', $last);
+		$waiting = $mirror->waiting();
+		$at = "error #{$position['last']}";
+		if ($position['pastEnd'])
+		{
+			// rows were deleted from the log, or it was emptied: not a fault, and the mirror
+			// sends only what is newer than the last error it sent
+			$at .= ", past the end of the log (#{$position['max']})";
+		}
 
 		$waiting > ErrorLogMirror::BATCH
-			? $this->checkWarn('position', "error #{$last} - {$waiting} waiting, more than one run sends; is cron running?")
-			: $this->checkOk('position', "error #{$last} - {$waiting} waiting for the next run");
+			? $this->checkWarn('position', "{$at} - {$waiting} waiting, more than one run sends; is cron running?")
+			: $this->checkOk('position', "{$at} - {$waiting} waiting for the next run");
 	}
 
 	/**
