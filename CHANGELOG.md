@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 1.0.0 Beta 3 (unreleased)
+## 1.0.0 Beta 3 (2026-10-12)
 
 - fix: deleting the newest entries from the server error log made the Server errors group send
   every entry left in it again
