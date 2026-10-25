@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 1.0.0 Beta 4 (unreleased)
+## 1.0.0 Beta 4 (2026-10-26)
 
 - fix: `event-logging:validate` failed with a PHP error, rather than saying so, when the log file
   exists but cannot be read by the user running the command
