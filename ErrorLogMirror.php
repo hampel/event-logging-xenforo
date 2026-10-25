@@ -148,7 +148,7 @@ class ErrorLogMirror
 	 * cannot tell those apart and dates can, so past the end the next run reads only what is newer
 	 * than the last row sent. `where` is null when there is nothing to read.
 	 *
-	 * @return array{last: ?int, lastDate: ?int, max: int, pastEnd: bool, where: ?string, params: array}
+	 * @return array{last: ?int, lastDate: ?int, max: int, pastEnd: bool, where: ?string, params: list<int>}
 	 */
 	public function position(): array
 	{
@@ -212,7 +212,8 @@ class ErrorLogMirror
 	 * One record per distinct error - type, file, line and message - with a count. A broken
 	 * template logs the same exception on every page view; that is one thing to fix, not a thousand.
 	 *
-	 * @return array[] each record's context
+	 * @param list<array<string, mixed>> $rows
+	 * @return list<array<string, mixed>> each record's context
 	 */
 	protected function collapse(array $rows): array
 	{
@@ -259,6 +260,8 @@ class ErrorLogMirror
 	 * be skipped as a repeat of the first.
 	 *
 	 * Never the error_id: an id that changes on every row makes every row new.
+	 *
+	 * @param array<string, mixed> $row
 	 */
 	public static function fingerprint(array $row): string
 	{

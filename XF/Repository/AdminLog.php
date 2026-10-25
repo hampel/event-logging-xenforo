@@ -14,6 +14,13 @@ class AdminLog extends XFCP_AdminLog
 
 	public const SKIP_KEEP_ALIVE_OPTION = 'eventLoggingAdminSkipKeepAlive';
 
+	/**
+	 * @param int $userId
+	 * @param string $url the request's route path
+	 * @param array<string, mixed> $data the submitted form - never logged
+	 * @param string $ipAddress
+	 * @return int|string|null the parent's: the new row's id, or null when nothing was logged
+	 */
 	public function logAdminRequest($userId, $url, array $data, $ipAddress)
 	{
 		$logId = parent::logAdminRequest($userId, $url, $data, $ipAddress);

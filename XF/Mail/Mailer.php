@@ -8,6 +8,12 @@ class Mailer extends XFCP_Mailer
 	/**
 	 * Untyped, with XenForo 2.2's two extra parameters: 2.2 sends a Swift message and 2.3 a Symfony
 	 * one, and this signature is compatible with both parents.
+	 *
+	 * @param object $message \Swift_Mime_SimpleMessage on 2.2, \Symfony\Component\Mime\Email on 2.3
+	 * @param mixed $transport
+	 * @param array<string, mixed>|null $queueEntry 2.2 only
+	 * @param bool $allowRetry 2.2 only
+	 * @return mixed the parent's: a count on 2.2, a SentMessage, false or null on 2.3
 	 */
 	public function send($message, $transport = null, $queueEntry = null, $allowRetry = true)
 	{
@@ -32,6 +38,9 @@ class Mailer extends XFCP_Mailer
 	 * Never the body: it is where a password reset or confirmation link is.
 	 *
 	 * Swift's getTo() is address => name; Symfony's is a list of Address objects.
+	 *
+	 * @param mixed $message
+	 * @return array{recipient_count: int, recipients: list<string>, subject: ?string}
 	 */
 	public static function describe($message): array
 	{

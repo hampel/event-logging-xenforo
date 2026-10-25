@@ -28,6 +28,9 @@ class Validate extends Command
 
 	private const PROBE_MESSAGE = 'Event logging probe';
 
+	/**
+	 * @return void
+	 */
 	protected function configure()
 	{
 		$this

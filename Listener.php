@@ -19,7 +19,7 @@ use XF\Mvc\Entity\Entity;
  */
 class Listener
 {
-	public static function moderatorLogPostSave(Entity $entity)
+	public static function moderatorLogPostSave(Entity $entity): void
 	{
 		if (!$entity instanceof ModeratorLog || !$entity->isInsert() || !Emitter::enabled('moderation'))
 		{
@@ -43,7 +43,7 @@ class Listener
 		]);
 	}
 
-	public static function loginAttemptPostSave(Entity $entity)
+	public static function loginAttemptPostSave(Entity $entity): void
 	{
 		if (!$entity instanceof LoginAttempt || !$entity->isInsert() || !Emitter::enabled('auth'))
 		{
@@ -68,7 +68,7 @@ class Listener
 		]);
 	}
 
-	public static function userBanPostSave(Entity $entity)
+	public static function userBanPostSave(Entity $entity): void
 	{
 		if (!$entity instanceof UserBan || !Emitter::enabled('moderation'))
 		{
@@ -92,7 +92,7 @@ class Listener
 		);
 	}
 
-	public static function userBanPostDelete(Entity $entity)
+	public static function userBanPostDelete(Entity $entity): void
 	{
 		if (!$entity instanceof UserBan || !Emitter::enabled('moderation'))
 		{
@@ -107,7 +107,7 @@ class Listener
 		]);
 	}
 
-	public static function paymentProviderLogPostSave(Entity $entity)
+	public static function paymentProviderLogPostSave(Entity $entity): void
 	{
 		if (!$entity instanceof PaymentProviderLog || !$entity->isInsert() || !Emitter::enabled('payments'))
 		{
@@ -124,7 +124,7 @@ class Listener
 		], $entity->log_type === 'error' ? LogLevel::WARNING : LogLevel::INFO);
 	}
 
-	public static function appApiComplete(\XF\App $app, \XF\Http\Response &$response)
+	public static function appApiComplete(\XF\App $app, \XF\Http\Response &$response): void
 	{
 		if (!Emitter::enabled('api'))
 		{
@@ -154,6 +154,8 @@ class Listener
 
 	/**
 	 * The reason a moderator gave, where the action has one; null where it has none.
+	 *
+	 * @param mixed $params the moderator log's action_params
 	 */
 	public static function reason($params): ?string
 	{
@@ -164,6 +166,8 @@ class Listener
 
 	/**
 	 * A packed IPv4 or IPv6 address as XenForo stores it, as text; null if it is neither.
+	 *
+	 * @param mixed $binary
 	 */
 	public static function ip($binary): ?string
 	{
@@ -185,8 +189,10 @@ class Listener
 	 *
 	 * The event is the Admin API's, and this add-on does not require it: on a forum without it the
 	 * event is never fired and this costs nothing.
+	 *
+	 * @param array<string, mixed> $declarations
 	 */
-	public static function adminApiRedaction(array &$declarations)
+	public static function adminApiRedaction(array &$declarations): void
 	{
 		$declarations['Hampel/EventLogging'] = [];
 	}

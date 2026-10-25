@@ -8,6 +8,11 @@ use Hampel\EventLogging\Emitter;
  */
 trait SpamTriggerEvents
 {
+	/**
+	 * @param string $contentType
+	 * @param int|string|null $contentId
+	 * @return int|string|bool the parent's: the new row's id, true, or false when nothing was logged
+	 */
 	public function logSpamTrigger($contentType, $contentId)
 	{
 		$logged = parent::logSpamTrigger($contentType, $contentId);

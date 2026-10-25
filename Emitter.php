@@ -77,7 +77,7 @@ class Emitter
 	 * @param string $group   a key of GROUPS; nothing is emitted unless its option is on
 	 * @param string $event   noun.verb, lowercase - what a query or an alert matches on
 	 * @param string $message a fixed string, for a person reading one line
-	 * @param array  $context identifiers, never content - see the README's list of what is never logged
+	 * @param array<string, mixed> $context identifiers, never content - see the README's list of what is never logged
 	 */
 	public static function emit(string $group, string $event, string $message, array $context = [], string $level = LogLevel::INFO): void
 	{

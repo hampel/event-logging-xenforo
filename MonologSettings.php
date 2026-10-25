@@ -85,6 +85,9 @@ class MonologSettings
 		return self::LEVELS[$level] ?? (string) $level;
 	}
 
+	/**
+	 * @return mixed what the read returned, or null if it threw
+	 */
 	private static function guard(callable $read)
 	{
 		try
