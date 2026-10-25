@@ -10,6 +10,9 @@ use XF\App;
  * event fires, and the `error` container key is a plain `new Error()`, so there is no class to
  * extend. This reads the table from the last error_id it sent, on a cron, and so runs up to one
  * cron interval behind.
+ *
+ * @phpstan-type ErrorRow array{error_id: int|string, exception_date: int|string, user_id: int|string,
+ *     exception_type: string, filename: string, line: int|string, message: string}
  */
 class ErrorLogMirror
 {
@@ -111,6 +114,7 @@ class ErrorLogMirror
 
 		// not trace_string, which is long, nor request_state, which holds the request's whole
 		// _GET and _POST
+		/** @var list<ErrorRow> $rows */
 		$rows = $db->fetchAll($db->limit("
 			SELECT error_id, exception_date, user_id, exception_type, filename, line,
 				LEFT(message, " . self::MESSAGE_LENGTH . ") AS message
@@ -128,7 +132,7 @@ class ErrorLogMirror
 
 		$cache->setValue(self::CACHE_KEY, $rows ? (int) end($rows)['error_id'] : $max);
 
-		$dates = array_map('intval', array_column($rows, 'exception_date'));
+		$dates = array_map(function ($date): int { return (int) $date; }, array_column($rows, 'exception_date'));
 		$newest = $dates ? max($dates) : null;
 		if ($lastDate === null)
 		{
@@ -213,7 +217,7 @@ class ErrorLogMirror
 	 * One record per distinct error - type, file, line and message - with a count. A broken
 	 * template logs the same exception on every page view; that is one thing to fix, not a thousand.
 	 *
-	 * @param list<array<string, mixed>> $rows
+	 * @param list<ErrorRow> $rows
 	 * @return list<array<string, mixed>> each record's context
 	 */
 	protected function collapse(array $rows): array
@@ -262,7 +266,7 @@ class ErrorLogMirror
 	 *
 	 * Never the error_id: an id that changes on every row makes every row new.
 	 *
-	 * @param array<string, mixed> $row
+	 * @param ErrorRow $row
 	 */
 	public static function fingerprint(array $row): string
 	{

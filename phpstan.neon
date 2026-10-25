@@ -2,7 +2,12 @@ includes:
     - vendor/hampel/xenforo-phpstan/extension.neon
 
 parameters:
-    level: 8
+    # Not max: at max the reports (32 on 2026-10-25) are values XenForo hands back untyped -
+    # fetchOne(), the simple cache set, container entries, an entity's getValue(), the request
+    # and the response, and what the parents of the three core overrides return. Passing them
+    # would mean asserting types over XenForo's API rather than finding anything; level 7 found
+    # the one real defect. No baseline.
+    level: 9
 
     # The add-on's PHP floor. PHPStan reports syntax newer than this, which the suite, running
     # on far newer PHP, cannot. It is why tests/ is not analysed here: read as 7.4, PHPUnit 12 is

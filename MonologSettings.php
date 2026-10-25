@@ -86,7 +86,9 @@ class MonologSettings
 	}
 
 	/**
-	 * @return mixed what the read returned, or null if it threw
+	 * @template T
+	 * @param callable(): T $read
+	 * @return T|null what the read returned, or null if it threw
 	 */
 	private static function guard(callable $read)
 	{

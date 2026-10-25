@@ -17,7 +17,9 @@ class Mailer extends XFCP_Mailer
 	 */
 	public function send($message, $transport = null, $queueEntry = null, $allowRetry = true)
 	{
-		$sent = parent::send(...func_get_args());
+		// passed on as given: each parent declares its own message class, and this signature has to
+		// accept both
+		$sent = parent::send(...func_get_args()); // @phpstan-ignore argument.type
 
 		if (Emitter::enabled('mail'))
 		{

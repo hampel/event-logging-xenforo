@@ -235,6 +235,7 @@ class Validate extends Command
 
 		// a handler that fails quietly - an unwritable file, a refused post - reports here and
 		// nowhere else
+		/** @var list<array{message: string}> $errors */
 		$errors = \XF::db()->fetchAll('SELECT message FROM xf_error_log WHERE error_id > ? ORDER BY error_id', $errorsBefore);
 		$errors
 			? $this->checkFail('server error log', count($errors) . ' new: ' . strtok($errors[0]['message'], "\n"))
@@ -337,6 +338,7 @@ class Validate extends Command
 		{
 			return ($json['channel'] ?? '') === Emitter::CHANNEL
 				&& ($json['message'] ?? '') === self::PROBE_MESSAGE
+				&& is_array($json['context'] ?? null)
 				&& ($json['context']['run'] ?? '') === $run;
 		}
 
