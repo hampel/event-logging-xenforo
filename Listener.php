@@ -1,6 +1,10 @@
 <?php namespace Hampel\EventLogging;
 
 use Psr\Log\LogLevel;
+use XF\Entity\LoginAttempt;
+use XF\Entity\ModeratorLog;
+use XF\Entity\PaymentProviderLog;
+use XF\Entity\UserBan;
 use XF\Mvc\Entity\Entity;
 
 /**
@@ -17,7 +21,7 @@ class Listener
 {
 	public static function moderatorLogPostSave(Entity $entity)
 	{
-		if (!$entity->isInsert() || !Emitter::enabled('moderation'))
+		if (!$entity instanceof ModeratorLog || !$entity->isInsert() || !Emitter::enabled('moderation'))
 		{
 			return;
 		}
@@ -41,7 +45,7 @@ class Listener
 
 	public static function loginAttemptPostSave(Entity $entity)
 	{
-		if (!$entity->isInsert() || !Emitter::enabled('auth'))
+		if (!$entity instanceof LoginAttempt || !$entity->isInsert() || !Emitter::enabled('auth'))
 		{
 			return;
 		}
@@ -66,7 +70,7 @@ class Listener
 
 	public static function userBanPostSave(Entity $entity)
 	{
-		if (!Emitter::enabled('moderation'))
+		if (!$entity instanceof UserBan || !Emitter::enabled('moderation'))
 		{
 			return;
 		}
@@ -90,7 +94,7 @@ class Listener
 
 	public static function userBanPostDelete(Entity $entity)
 	{
-		if (!Emitter::enabled('moderation'))
+		if (!$entity instanceof UserBan || !Emitter::enabled('moderation'))
 		{
 			return;
 		}
@@ -105,7 +109,7 @@ class Listener
 
 	public static function paymentProviderLogPostSave(Entity $entity)
 	{
-		if (!$entity->isInsert() || !Emitter::enabled('payments'))
+		if (!$entity instanceof PaymentProviderLog || !$entity->isInsert() || !Emitter::enabled('payments'))
 		{
 			return;
 		}
