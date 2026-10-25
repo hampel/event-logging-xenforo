@@ -103,8 +103,9 @@ class Emitter
 			$container = \XF::app()->container();
 
 			// required by addon.json, but an add-on can be disabled after ours is installed
-			self::$logger = $container->offsetExists('monolog') && method_exists($container['monolog'], 'channel')
-				? $container['monolog']->channel(self::CHANNEL)
+			$monolog = $container->offsetExists('monolog') ? $container['monolog'] : null;
+			self::$logger = is_object($monolog) && method_exists($monolog, 'channel')
+				? $monolog->channel(self::CHANNEL)
 				: new NullLogger();
 		}
 

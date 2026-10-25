@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 1.0.0 Beta 4 (unreleased)
+
+- fix: `event-logging:validate` failed with a PHP error, rather than saying so, when the log file
+  exists but cannot be read by the user running the command
+
 ## 1.0.0 Beta 3 (2026-10-12)
 
 - fix: deleting the newest entries from the server error log made the Server errors group send

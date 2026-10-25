@@ -128,7 +128,8 @@ class ErrorLogMirror
 
 		$cache->setValue(self::CACHE_KEY, $rows ? (int) end($rows)['error_id'] : $max);
 
-		$newest = $rows ? max(array_map('intval', array_column($rows, 'exception_date'))) : null;
+		$dates = array_map('intval', array_column($rows, 'exception_date'));
+		$newest = $dates ? max($dates) : null;
 		if ($lastDate === null)
 		{
 			$lastDate = $this->newestDate($last);

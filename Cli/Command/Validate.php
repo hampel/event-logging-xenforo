@@ -250,7 +250,15 @@ class Validate extends Command
 			return;
 		}
 
-		[$own, $others] = $this->probeLines($path, $offset, $run);
+		$lines = $this->probeLines($path, $offset, $run);
+		if ($lines === null)
+		{
+			// Monolog can append to a file this user cannot read: one owned by the web server's user
+			$this->checkFail('log file', "{$path} cannot be read, so the probe cannot be looked for");
+			return;
+		}
+
+		[$own, $others] = $lines;
 		$custom = MonologSettings::hasCustomFormatter();
 		$found = $custom ? ($own + $others) > 0 : $own > 0;
 
@@ -284,9 +292,10 @@ class Validate extends Command
 	 * and anything else mentioning it. Another record can quote the probe - a mail transport that
 	 * logs what it sent, say - and must not be taken for it.
 	 *
-	 * @return array{0: int, 1: int} [the probe's own records, other lines mentioning the run]
+	 * @return array{0: int, 1: int}|null [the probe's own records, other lines mentioning the run],
+	 *         or null when the file cannot be read
 	 */
-	private function probeLines(string $path, int $offset, string $run): array
+	private function probeLines(string $path, int $offset, string $run): ?array
 	{
 		clearstatcache(true, $path);
 		if (!is_file($path))
@@ -296,7 +305,12 @@ class Validate extends Command
 
 		$own = 0;
 		$others = 0;
-		$handle = fopen($path, 'r');
+		$handle = @fopen($path, 'r');
+		if ($handle === false)
+		{
+			return null;
+		}
+
 		fseek($handle, $offset);
 		while (($line = fgets($handle)) !== false)
 		{

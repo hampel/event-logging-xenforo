@@ -49,13 +49,13 @@ class Mailer extends XFCP_Mailer
 
 		try
 		{
-			$to = method_exists($message, 'getTo') ? $message->getTo() : [];
+			$to = is_object($message) && method_exists($message, 'getTo') ? $message->getTo() : [];
 			foreach ((array) $to AS $key => $value)
 			{
-				$recipients[] = is_object($value) ? $value->getAddress() : (string) $key;
+				$recipients[] = $value instanceof \Symfony\Component\Mime\Address ? $value->getAddress() : (string) $key;
 			}
 
-			$subject = method_exists($message, 'getSubject') ? $message->getSubject() : null;
+			$subject = is_object($message) && method_exists($message, 'getSubject') ? $message->getSubject() : null;
 		}
 		catch (\Throwable $e)
 		{

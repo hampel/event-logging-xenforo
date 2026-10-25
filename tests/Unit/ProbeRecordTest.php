@@ -58,4 +58,31 @@ class ProbeRecordTest extends TestCase
 
 		$this->assertFalse(Validate::isProbeRecord($line, self::RUN));
 	}
+
+	/**
+	 * A log file Monolog can append to and the command cannot read - write-only, or owned by the
+	 * web server's user - is reported as unreadable, not a TypeError from fseek().
+	 */
+	public function test_a_log_file_that_cannot_be_read_is_reported_as_such()
+	{
+		$path = tempnam(sys_get_temp_dir(), 'eventlogging');
+		file_put_contents($path, '{"message":"Event logging probe","run":"' . self::RUN . '"}' . "\n");
+		chmod($path, 0200);
+
+		try
+		{
+			if (is_readable($path))
+			{
+				$this->markTestSkipped('this process can read a write-only file, so the case cannot be made');
+			}
+
+			$probeLines = new \ReflectionMethod(Validate::class, 'probeLines');
+			$this->assertNull($probeLines->invoke(new Validate(), $path, 0, self::RUN));
+		}
+		finally
+		{
+			chmod($path, 0600);
+			unlink($path);
+		}
+	}
 }
