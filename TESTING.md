@@ -62,6 +62,7 @@ From the add-on root, inside a XenForo install with Monolog Logging Service 5.0.
 ```bash
 composer install
 vendor/bin/phpunit
+vendor/bin/phpstan analyse        # at the level in phpstan.neon, reading the source as PHP 7.4
 ```
 
 `tests/Unit` covers the pure functions: the admin route, the moderator's reason, the stored IP

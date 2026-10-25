@@ -187,7 +187,16 @@ Tests run from the add-on root, against the XenForo install around it:
 ```bash
 composer install            # first time; vendor/ is gitignored
 vendor/bin/phpunit
+vendor/bin/phpstan analyse
 ```
+
+**PHPStan reads the source as PHP 7.4, the floor, and leaves `tests/` out**, since PHPUnit 12 is
+unreadable as 7.4. It runs through `hampel/xenforo-phpstan`, which types the forum's legacy class
+names and `XFCP_` parents from files generated into the forum's `internal_data/phpstan/` and
+shared by every add-on there: check them with `vendor/bin/xenforo-phpstan generate --check`
+rather than regenerating them. **Its level is the one in `phpstan.neon`, and a level below max
+says why beside it.** An override of a core method carries its types in a docblock, never natively:
+a sibling add-on's untyped override of the same method is then a fatal when the chain loads.
 
 **`tests/Unit` holds the pure functions** — the admin route, the moderator's reason, the stored IP,
 the mail description and the error fingerprint — and `tests/Feature` everything that drives
@@ -224,8 +233,8 @@ XenForo 2.2 does not have; and never name a helper `run()`.
 ## Release packaging
 
 **Composer is for the test suite only.** There is no `composer_autoload` in `addon.json`, and
-`build.json` removes `composer.json`, `composer.lock` and `vendor/` from the release along with
-the tests and the dev-only markdown. `Psr\Log` comes from XenForo.
+`build.json` removes `composer.json`, `composer.lock`, `vendor/` and `phpstan.neon` from the
+release along with the tests and the dev-only markdown. `Psr\Log` comes from XenForo.
 
 **`mv *.md _build/` promotes, it does not exclude.** Any root markdown file not removed by an
 earlier `rm -fv` step ships at the top of the zip, so a new dev-only file belongs in that step and
