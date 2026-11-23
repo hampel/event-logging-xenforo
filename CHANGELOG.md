@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 1.0.0 Beta 5 (unreleased)
+## 1.0.0 Beta 5 (2026-11-23)
 
 - new: where the Admin API add-on is installed, it can run `event-logging:validate`'s checks and
   report their outcomes; the probe record, which writes to the log, is listed and not run
