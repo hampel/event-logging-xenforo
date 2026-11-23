@@ -13,6 +13,8 @@ needs a person.
 - `app_api_complete`
 - `hampel_admin_api_redaction` — declares to the Admin API add-on, where it is installed, that this
   add-on has no secrets. The event is that add-on's; without it the listener never runs.
+- `hampel_admin_api_validate` — declares `Check\HealthCheck`'s checks to the same add-on, which
+  runs every one but the probe record over HTTP. Also its event; without it, never run.
 
 **Class extensions**
 

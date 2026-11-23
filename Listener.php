@@ -196,4 +196,27 @@ class Listener
 	{
 		$declarations['Hampel/EventLogging'] = [];
 	}
+
+	/**
+	 * Tells the Admin API which checks event-logging:validate runs, so it can run them over HTTP
+	 * and return their outcomes. Every check is marked safe to run there except the probe, which
+	 * writes a record: the API lists it as skipped, as the command does under --unattended.
+	 *
+	 * Like the redaction declaration, the event is the Admin API's and is never fired without it.
+	 *
+	 * @param array<string, mixed> $validators
+	 */
+	public static function adminApiValidate(array &$validators): void
+	{
+		$validators['Hampel/EventLogging'] = [
+			'class' => \Hampel\EventLogging\Check\HealthCheck::class,
+			'checks' => [
+				'monolog' => ['label' => 'Monolog add-on', 'method' => 'monolog', 'api' => true],
+				'groups' => ['label' => 'Event groups', 'method' => 'groups', 'api' => true],
+				'log_file' => ['label' => 'Log file level and format', 'method' => 'logFile', 'api' => true],
+				'error_log' => ['label' => 'Server error log mirror', 'method' => 'errorLog', 'api' => true],
+				'probe' => ['label' => 'Probe record', 'method' => 'probeRecord'],
+			],
+		];
+	}
 }

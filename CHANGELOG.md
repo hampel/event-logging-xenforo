@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 1.0.0 Beta 5 (unreleased)
+
+- new: where the Admin API add-on is installed, it can run `event-logging:validate`'s checks and
+  report their outcomes; the probe record, which writes to the log, is listed and not run
+
 ## 1.0.0 Beta 4 (2026-10-26)
 
 - fix: `event-logging:validate` failed with a PHP error, rather than saying so, when the log file

@@ -70,6 +70,14 @@ list is a declaration. It is not a dependency — the event is the Admin API's, 
 where that add-on is absent. **A new option that is a secret is declared in the same commit**;
 `AdminApiRedactionTest` fails on one whose id reads like a credential until somebody decides.
 
+**It answers `hampel_admin_api_validate` too, so the Admin API can run `event-logging:validate`'s
+checks over HTTP and return their outcomes.** The checks live in `Check\HealthCheck`, one public
+method per check returning `[outcome, label, detail]` rows, and the command only renders them.
+Every check is declared `api` except `probeRecord()`, which writes; the API lists it as skipped.
+**A new check is declared in the same commit that adds it**: `AdminApiValidateTest` fails on a
+public method that is not declared, a declaration with no method, a check the command does not
+render, and a read-only check that writes.
+
 ## What a record may hold
 
 **Identifiers, plus what an administrator needs to read the line — never content, and never a

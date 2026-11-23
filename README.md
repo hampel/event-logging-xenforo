@@ -208,6 +208,11 @@ on it. `--strict` makes a warning exit 2, for a monitor that should hear of one:
   record per run.
 - **A fresh install validates with a warning**, because every group is off until you turn one on.
 
+**Where the Admin API add-on is installed, it can run the same checks over HTTP** and return
+each one's outcome, never the text of its rows. Every check runs there except the probe record,
+which writes to the log and is reported as skipped, as it is under `--unattended`. Nothing needs
+setting up, and this add-on does not require the Admin API.
+
 ## Licence
 
 MIT — see `LICENSE.md`.

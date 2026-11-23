@@ -1,6 +1,6 @@
 <?php namespace Tests\Unit;
 
-use Hampel\EventLogging\Cli\Command\Validate;
+use Hampel\EventLogging\Check\HealthCheck;
 use Tests\TestCase;
 
 /**
@@ -22,7 +22,7 @@ class ProbeRecordTest extends TestCase
 			'extra' => [],
 		]) . "\n";
 
-		$this->assertTrue(Validate::isProbeRecord($line, self::RUN));
+		$this->assertTrue(HealthCheck::isProbeRecord($line, self::RUN));
 	}
 
 	public function test_the_line_record_is_the_probes_own()
@@ -30,14 +30,14 @@ class ProbeRecordTest extends TestCase
 		$line = '[2026-10-08 09:15:02] events.INFO: Event logging probe {"event":"eventlogging.validate","probe":true,"run":"'
 			. self::RUN . '"} {"request_id":"67ea87d5"}' . "\n";
 
-		$this->assertTrue(Validate::isProbeRecord($line, self::RUN));
+		$this->assertTrue(HealthCheck::isProbeRecord($line, self::RUN));
 	}
 
 	public function test_another_runs_record_is_not()
 	{
 		$line = json_encode(['message' => 'Event logging probe', 'channel' => 'events', 'context' => ['run' => 'ffffffff']]);
 
-		$this->assertFalse(Validate::isProbeRecord($line, self::RUN));
+		$this->assertFalse(HealthCheck::isProbeRecord($line, self::RUN));
 	}
 
 	public function test_a_json_record_on_another_channel_quoting_the_probe_is_not()
@@ -48,7 +48,7 @@ class ProbeRecordTest extends TestCase
 			'context' => ['body' => 'events.INFO: Event logging probe {"run":"' . self::RUN . '"}'],
 		]);
 
-		$this->assertFalse(Validate::isProbeRecord($line, self::RUN));
+		$this->assertFalse(HealthCheck::isProbeRecord($line, self::RUN));
 	}
 
 	public function test_a_line_record_on_another_channel_quoting_the_probe_is_not()
@@ -56,7 +56,7 @@ class ProbeRecordTest extends TestCase
 		$line = '[2026-10-08 09:15:03] sparkpost.DEBUG: Sent email {"body":"[2026-10-08 09:15:02] events.INFO: '
 			. 'Event logging probe {\"run\":\"' . self::RUN . '\"}"} []';
 
-		$this->assertFalse(Validate::isProbeRecord($line, self::RUN));
+		$this->assertFalse(HealthCheck::isProbeRecord($line, self::RUN));
 	}
 
 	/**
@@ -76,8 +76,8 @@ class ProbeRecordTest extends TestCase
 				$this->markTestSkipped('this process can read a write-only file, so the case cannot be made');
 			}
 
-			$probeLines = new \ReflectionMethod(Validate::class, 'probeLines');
-			$this->assertNull($probeLines->invoke(new Validate(), $path, 0, self::RUN));
+			$probeLines = new \ReflectionMethod(HealthCheck::class, 'probeLines');
+			$this->assertNull($probeLines->invoke(new HealthCheck(\XF::app()), $path, 0, self::RUN));
 		}
 		finally
 		{
